@@ -34,6 +34,9 @@ targets:
     dependencies:
       - package: core-swift
         product: CoreSwift
+      - sdk: CarPlay.framework
+      - sdk: MapKit.framework
+      - sdk: AVFoundation.framework
     settings:
       base:
         PRODUCT_NAME: DriveByCurio

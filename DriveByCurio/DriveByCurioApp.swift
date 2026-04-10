@@ -1,15 +1,16 @@
 import SwiftUI
+import CoreSwift
 
 @main
 struct DriveByCurioApp: App {
-    @State private var topicsStore = TopicsStore()
-    @State private var poiStore = POIStore()
+    private let appState = AppState.shared
 
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(topicsStore)
-                .environment(poiStore)
+                .environment(appState.topicsStore)
+                .environment(appState.poiStore)
+                .environment(appState.locationService)
         }
     }
 }

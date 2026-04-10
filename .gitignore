@@ -9,3 +9,8 @@ Package.resolved
 *.dSYM
 Pods/
 .build/
+
+# Backend
+backend/node_modules/
+backend/dist/
+backend/package-lock.json
