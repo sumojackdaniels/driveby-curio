@@ -1,6 +1,6 @@
 name: DriveByCurio
 options:
-  bundleIdPrefix: com.sumojackdaniels
+  bundleIdPrefix: com.enolabs
   deploymentTarget:
     iOS: "26.0"
   xcodeVersion: "16.0"
