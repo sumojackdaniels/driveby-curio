@@ -31,6 +31,8 @@ targets:
           - "**/*.md"
     entitlements:
       path: DriveByCurio/Entitlements.plist
+      properties:
+        com.apple.developer.carplay-driving-task: true
     dependencies:
       - package: core-swift
         product: CoreSwift
