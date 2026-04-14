@@ -12,8 +12,7 @@ final class AppState {
     let announcementService = AudioAnnouncementService()
 
     lazy var poiService: POIService = {
-        // TODO: Replace with deployed Cloud Run URL
-        let baseURL = URL(string: "http://localhost:8080")!
+        let baseURL = URL(string: "https://curio-api-hdfess23ra-uc.a.run.app")!
         return POIService(baseURL: baseURL)
     }()
 
