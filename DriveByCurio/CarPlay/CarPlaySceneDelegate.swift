@@ -211,20 +211,21 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
 // MARK: - CPPointOfInterestTemplateDelegate
 
 extension CarPlaySceneDelegate: CPPointOfInterestTemplateDelegate {
-    func pointOfInterestTemplate(
+    nonisolated func pointOfInterestTemplate(
         _ pointOfInterestTemplate: CPPointOfInterestTemplate,
         didChangeMapRegion region: MKCoordinateRegion
     ) {
-        // Could fetch POIs for the visible region in future
+        // CarPlay delivers this from an XPC background thread — keep it
+        // nonisolated and hop to MainActor only when we touch state.
     }
 
-    func pointOfInterestTemplate(
+    nonisolated func pointOfInterestTemplate(
         _ pointOfInterestTemplate: CPPointOfInterestTemplate,
         didSelectPointOfInterest pointOfInterest: CPPointOfInterest
     ) {
         guard let poi = pointOfInterest.userInfo as? POI else { return }
         Task { @MainActor in
-            showPOIDetail(poi)
+            self.showPOIDetail(poi)
         }
     }
 }
