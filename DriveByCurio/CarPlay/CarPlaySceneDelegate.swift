@@ -1,25 +1,38 @@
 import CarPlay
 import CoreLocation
-import MapKit
 import CoreSwift
+import UIKit
+
+// CarPlay scene delegate — Audio category implementation.
+//
+// Template structure (see specs/CARPLAY-CONSTRAINTS.md for the allow-list):
+//
+//   CPTabBarTemplate (root)
+//     ├── Tours tab            → CPListTemplate of curated tours
+//     │     └── on tap         → CPNowPlayingTemplate.shared() (tour starts)
+//     │           └── Playing Next button → CPListTemplate (upcoming queue)
+//     └── (placeholder) Live tab → an alert template explaining that live
+//                                  mode is being rebuilt; we keep the tab so
+//                                  the navigation shape matches PRODUCT.md
+//                                  even though milestone 1 ships tours only.
+//
+// Audio session is NOT activated on connect — only when the user explicitly
+// taps a tour to start it (TourPlayer.startTour). This is the audio-citizen
+// rule from the CarPlay developer guide.
 
 class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
+
     var interfaceController: CPInterfaceController?
     private var templateApplicationScene: CPTemplateApplicationScene?
 
-    // Shared state — injected from app-level stores
     static var shared: CarPlaySceneDelegate?
     @MainActor static var isConnected = false
 
-    private var poiStore: POIStore { AppState.shared.poiStore }
-    private var topicsStore: TopicsStore { AppState.shared.topicsStore }
+    private var tourCatalogStore: TourCatalogStore { AppState.shared.tourCatalogStore }
+    private var tourPlayer: TourPlayer { AppState.shared.tourPlayer }
     private var locationService: LocationService { AppState.shared.locationService }
-    private var refreshController: POIRefreshController { AppState.shared.refreshController }
-    private var announcementService: AudioAnnouncementService { AppState.shared.announcementService }
 
-    private var poiTemplate: CPPointOfInterestTemplate?
-    private var topicsTemplate: CPListTemplate?
-    private var locationObserver: NSObjectProtocol?
+    private var toursListTemplate: CPListTemplate?
 
     // MARK: - Scene Lifecycle
 
@@ -35,8 +48,10 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
             Self.isConnected = true
             setupTabBar()
             locationService.startUpdating()
-            refreshController.startRefreshTimer()
             startLocationObservation()
+            await tourCatalogStore.loadCatalog()
+            self.refreshToursList()
+            configureNowPlayingTemplate()
         }
     }
 
@@ -46,7 +61,6 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
     ) {
         Task { @MainActor in
             Self.isConnected = false
-            refreshController.stopRefreshTimer()
             locationService.stopUpdating()
         }
         self.interfaceController = nil
@@ -54,178 +68,124 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
         Self.shared = nil
     }
 
-    // MARK: - Tab Bar Setup
+    // MARK: - Tab Bar
 
     @MainActor
     private func setupTabBar() {
-        // Tab 1: Nearby POIs
-        let poiTemplate = createPOITemplate()
-        self.poiTemplate = poiTemplate
+        let toursTemplate = createToursListTemplate()
+        self.toursListTemplate = toursTemplate
 
-        // Tab 2: Topics
-        let topicsTemplate = createTopicsTemplate()
-        self.topicsTemplate = topicsTemplate
+        let liveTemplate = createLivePlaceholderTemplate()
 
-        let tabBar = CPTabBarTemplate(templates: [poiTemplate, topicsTemplate])
+        let tabBar = CPTabBarTemplate(templates: [toursTemplate, liveTemplate])
         interfaceController?.setRootTemplate(tabBar, animated: false)
     }
 
-    // MARK: - POI Template
+    // MARK: - Tours list
 
     @MainActor
-    private func createPOITemplate() -> CPPointOfInterestTemplate {
-        let pois = buildCPPointsOfInterest()
-        let template = CPPointOfInterestTemplate(title: "Nearby", pointsOfInterest: pois, selectedIndex: NSNotFound)
-        template.tabTitle = "Nearby"
-        template.tabImage = UIImage(systemName: "mappin.and.ellipse")
-        template.pointOfInterestDelegate = self
+    private func createToursListTemplate() -> CPListTemplate {
+        let template = CPListTemplate(title: "Tours", sections: [])
+        template.tabTitle = "Tours"
+        template.tabImage = UIImage(systemName: "headphones")
+        template.emptyViewTitleVariants = ["Loading tours…"]
+        template.emptyViewSubtitleVariants = ["Curated drives load from the backend on connect."]
         return template
     }
 
     @MainActor
-    private func buildCPPointsOfInterest() -> [CPPointOfInterest] {
-        let displayPOIs = Array(poiStore.pois.prefix(12))
+    private func refreshToursList() {
+        guard let template = toursListTemplate else { return }
 
-        return displayPOIs.map { poi in
-            let coordinate = CLLocationCoordinate2D(latitude: poi.lat, longitude: poi.lng)
-            let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
-            mapItem.name = poi.name
-
-            let cpPOI = CPPointOfInterest(
-                location: mapItem,
-                title: poi.name,
-                subtitle: poi.topics.joined(separator: ", "),
-                summary: nil,
-                detailTitle: poi.name,
-                detailSubtitle: poi.topics.joined(separator: ", "),
-                detailSummary: poi.description,
-                pinImage: UIImage(systemName: "mappin.circle.fill")
+        let items: [CPListItem] = tourCatalogStore.tours.map { summary in
+            let item = CPListItem(
+                text: summary.title,
+                detailText: "\(summary.region) · \(summary.duration_minutes) min · \(summary.waypoint_count) stops"
             )
-            cpPOI.userInfo = poi
-            return cpPOI
+            item.handler = { [weak self] _, completion in
+                Task { @MainActor in
+                    await self?.startTour(id: summary.id)
+                    completion()
+                }
+            }
+            return item
         }
+
+        let section = CPListSection(items: items, header: "Curated tours", sectionIndexTitle: nil)
+        template.updateSections([section])
     }
 
     @MainActor
-    func refreshPOITemplate() {
-        guard let poiTemplate else { return }
-        let newPOIs = buildCPPointsOfInterest()
-        poiTemplate.setPointsOfInterest(newPOIs, selectedIndex: NSNotFound)
+    private func startTour(id: String) async {
+        guard let tour = await tourCatalogStore.fetchTour(id: id) else { return }
+        tourPlayer.startTour(tour)
+
+        // Push the system Now Playing template on top of the current stack
+        // so the driver immediately sees the playback surface.
+        let nowPlaying = CPNowPlayingTemplate.shared
+        interfaceController?.pushTemplate(nowPlaying, animated: true)
     }
 
-    // MARK: - POI Detail (CPInformationTemplate)
+    // MARK: - Live placeholder (Mode 2 — coming back later)
 
     @MainActor
-    private func showPOIDetail(_ poi: POI) {
-        guard let interfaceController else { return }
-
-        // Calculate distance and direction from current location
-        var distanceText = ""
-        if let userLocation = locationService.currentLocation {
-            let poiLocation = CLLocation(latitude: poi.lat, longitude: poi.lng)
-            let distance = userLocation.distance(from: poiLocation)
-            let formatted = HeadingCalculator.formatDistance(distance)
-            let bearing = HeadingCalculator.bearingBetween(
-                from: userLocation.coordinate,
-                to: poi.coordinate
-            )
-            let direction = HeadingCalculator.compassDirection(degrees: bearing)
-            distanceText = "\(formatted) \(direction)"
-        }
-
-        let items: [CPInformationItem] = [
-            CPInformationItem(title: "Topics", detail: poi.topics.joined(separator: ", ")),
-            CPInformationItem(title: "About", detail: poi.description),
-            CPInformationItem(title: "Distance", detail: distanceText.isEmpty ? "Calculating..." : distanceText),
+    private func createLivePlaceholderTemplate() -> CPListTemplate {
+        let template = CPListTemplate(title: "Live", sections: [])
+        template.tabTitle = "Live"
+        template.tabImage = UIImage(systemName: "antenna.radiowaves.left.and.right")
+        template.emptyViewTitleVariants = ["Live mode is coming"]
+        template.emptyViewSubtitleVariants = [
+            "On-the-fly contextual narration for any drive — under redesign for the Audio category."
         ]
-
-        let openInMaps = CPTextButton(title: "Open in Maps", textStyle: .normal) { [weak self] _ in
-            let coordinate = CLLocationCoordinate2D(latitude: poi.lat, longitude: poi.lng)
-            let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate))
-            mapItem.name = poi.name
-            let url = URL(string: "maps://?ll=\(poi.lat),\(poi.lng)&q=\(poi.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? poi.name)")!
-            self?.templateApplicationScene?.open(url, options: nil)
-        }
-
-        let infoTemplate = CPInformationTemplate(
-            title: poi.name,
-            layout: .twoColumn,
-            items: items,
-            actions: [openInMaps]
-        )
-
-        interfaceController.pushTemplate(infoTemplate, animated: true)
-    }
-
-    // MARK: - Topics Template
-
-    @MainActor
-    private func createTopicsTemplate() -> CPListTemplate {
-        let items = buildTopicsListItems()
-        let section = CPListSection(items: items, header: "Your Interests", sectionIndexTitle: nil)
-        let template = CPListTemplate(title: "Topics", sections: [section])
-        template.tabTitle = "Topics"
-        template.tabImage = UIImage(systemName: "list.star")
-        template.emptyViewTitleVariants = ["No Topics"]
-        template.emptyViewSubtitleVariants = ["Open DriveByCurio on your iPhone to set your interests"]
         return template
     }
 
-    @MainActor
-    private func buildTopicsListItems() -> [CPListItem] {
-        let topics = topicsStore.parsedTopics
-        guard !topics.isEmpty else { return [] }
+    // MARK: - Now Playing template configuration
 
-        return topics.map { topic in
-            let item = CPListItem(text: topic, detailText: nil)
+    @MainActor
+    private func configureNowPlayingTemplate() {
+        let np = CPNowPlayingTemplate.shared
+        np.isUpNextButtonEnabled = true
+        np.upNextTitle = "Playing Next"
+        np.add(self)
+
+        // Custom buttons: the system handles play/pause and next-track via
+        // MPRemoteCommandCenter (configured in TourPlayer). We don't add
+        // bespoke CarPlay-only buttons in milestone 1.
+    }
+
+    @MainActor
+    private func showUpNextList() {
+        let upcoming = tourPlayer.upcomingWaypoints
+        let items: [CPListItem] = upcoming.map { wp in
+            let item = CPListItem(text: wp.title, detailText: wp.subject)
             item.handler = { _, completion in completion() }
             return item
         }
+        let section = CPListSection(items: items, header: "Upcoming stops", sectionIndexTitle: nil)
+        let template = CPListTemplate(title: "Playing Next", sections: [section])
+        interfaceController?.pushTemplate(template, animated: true)
     }
 
-    @MainActor
-    func refreshTopicsTemplate() {
-        guard let topicsTemplate else { return }
-        let items = buildTopicsListItems()
-        let section = CPListSection(items: items, header: "Your Interests", sectionIndexTitle: nil)
-        topicsTemplate.updateSections([section])
-    }
-
-    // MARK: - Location Observation
+    // MARK: - Location observation → trigger-circle progression
 
     private func startLocationObservation() {
-        // Use a timer to periodically check for location updates and refresh POIs
-        Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
+        Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self,
                       let location = self.locationService.currentLocation else { return }
-
-                let heading = self.locationService.currentHeading?.trueHeading ?? 0
-                await self.refreshController.onLocationUpdate(location, heading: heading)
-                self.refreshPOITemplate()
+                self.tourPlayer.onLocationUpdate(location)
             }
         }
     }
 }
 
-// MARK: - CPPointOfInterestTemplateDelegate
+// MARK: - CPNowPlayingTemplateObserver
 
-extension CarPlaySceneDelegate: CPPointOfInterestTemplateDelegate {
-    nonisolated func pointOfInterestTemplate(
-        _ pointOfInterestTemplate: CPPointOfInterestTemplate,
-        didChangeMapRegion region: MKCoordinateRegion
-    ) {
-        // CarPlay delivers this from an XPC background thread — keep it
-        // nonisolated and hop to MainActor only when we touch state.
-    }
-
-    nonisolated func pointOfInterestTemplate(
-        _ pointOfInterestTemplate: CPPointOfInterestTemplate,
-        didSelectPointOfInterest pointOfInterest: CPPointOfInterest
-    ) {
-        guard let poi = pointOfInterest.userInfo as? POI else { return }
+extension CarPlaySceneDelegate: CPNowPlayingTemplateObserver {
+    func nowPlayingTemplateUpNextButtonTapped(_ nowPlayingTemplate: CPNowPlayingTemplate) {
         Task { @MainActor in
-            self.showPOIDetail(poi)
+            self.showUpNextList()
         }
     }
 }

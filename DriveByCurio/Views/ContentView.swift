@@ -1,34 +1,19 @@
 import SwiftUI
 import CoreSwift
 
+// Top-level iPhone view.
+//
+// Milestone 1 (curated tours) replaces the old POI/topics-heavy ContentView
+// with a tour browser. The legacy live-mode UI (TopicsEditorView etc.)
+// remains in the codebase but is not currently linked into the navigation —
+// it will come back as a tab once Mode 2 is rebuilt for the Audio category.
 struct ContentView: View {
-    @Environment(TopicsStore.self) var topicsStore
-    @Environment(POIStore.self) var poiStore
-    @Environment(LocationService.self) var locationService
-
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 20) {
-                // Location status
-                LocationStatusView()
-
-                // CarPlay connection status
-                CarPlayConnectionView()
-
-                // Topics editor
-                TopicsEditorView()
-
-                Spacer()
-            }
-            .padding()
-            .navigationTitle("DriveByCurio")
-        }
+        TourBrowserView()
     }
 }
 
 struct CarPlayConnectionView: View {
-    @Environment(POIStore.self) var poiStore
-
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: CarPlaySceneDelegate.isConnected ? "car.fill" : "car")
@@ -43,16 +28,6 @@ struct CarPlayConnectionView: View {
             }
 
             Spacer()
-
-            if !poiStore.pois.isEmpty {
-                Text("\(poiStore.pois.count) POIs")
-                    .font(.caption)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(.blue.opacity(0.1), in: Capsule())
-            }
         }
-        .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
 }
