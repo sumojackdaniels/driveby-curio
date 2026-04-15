@@ -32,7 +32,7 @@ targets:
     entitlements:
       path: DriveByCurio/Entitlements.plist
       properties:
-        com.apple.developer.carplay-driving-task: true
+        com.apple.developer.carplay-audio: true
     dependencies:
       - package: core-swift
         product: CoreSwift
