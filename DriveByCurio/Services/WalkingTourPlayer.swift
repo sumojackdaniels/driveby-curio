@@ -312,13 +312,11 @@ final class WalkingTourPlayer: NSObject {
         request.transportType = .walking
 
         let directions = MKDirections(request: request)
-        directions.calculate { [weak self] response, error in
-            Task { @MainActor [weak self] in
+        Task { [weak self] in
+            let response = try? await directions.calculate()
+            await MainActor.run {
                 if let route = response?.routes.first {
                     self?.walkingRoute = route
-                }
-                if let error {
-                    print("WalkingTourPlayer: directions error: \(error)")
                 }
             }
         }
@@ -457,10 +455,11 @@ final class WalkingTourPlayer: NSObject {
 
 // MARK: - CLLocationManagerDelegate (heading updates)
 
-extension WalkingTourPlayer: @preconcurrency CLLocationManagerDelegate {
+extension WalkingTourPlayer: CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        let heading = newHeading
         Task { @MainActor in
-            self.currentHeading = newHeading
+            self.currentHeading = heading
         }
     }
 }
