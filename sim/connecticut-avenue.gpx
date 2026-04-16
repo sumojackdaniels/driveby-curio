@@ -1,186 +1,60 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="DriveByCurio generate-gpx.ts" xmlns="http://www.topografix.com/GPX/1/1">
-  <metadata>
-    <name>From Streetcar Suburb to Federal City</name>
-    <desc>Bethesda to Dupont Circle through 130 years of Washington's northwest</desc>
-  </metadata>
-  <trk>
-    <name>connecticut-avenue</name>
-    <trkseg>
-      <trkpt lat="38.984730" lon="-77.094250">
-        <time>2026-04-15T15:00:00.000Z</time>
-      </trkpt>
-      <trkpt lat="38.982286" lon="-77.091406">
-        <time>2026-04-15T15:00:15.714Z</time>
-      </trkpt>
-      <trkpt lat="38.979841" lon="-77.088561">
-        <time>2026-04-15T15:00:31.428Z</time>
-      </trkpt>
-      <trkpt lat="38.977397" lon="-77.085717">
-        <time>2026-04-15T15:00:47.142Z</time>
-      </trkpt>
-      <trkpt lat="38.974953" lon="-77.082873">
-        <time>2026-04-15T15:01:02.857Z</time>
-      </trkpt>
-      <trkpt lat="38.972509" lon="-77.080029">
-        <time>2026-04-15T15:01:18.571Z</time>
-      </trkpt>
-      <trkpt lat="38.970064" lon="-77.077184">
-        <time>2026-04-15T15:01:34.285Z</time>
-      </trkpt>
-      <trkpt lat="38.967620" lon="-77.074340">
-        <time>2026-04-15T15:01:50.000Z</time>
-      </trkpt>
-      <trkpt lat="38.966474" lon="-77.073663">
-        <time>2026-04-15T15:02:05.714Z</time>
-      </trkpt>
-      <trkpt lat="38.965329" lon="-77.072986">
-        <time>2026-04-15T15:02:21.428Z</time>
-      </trkpt>
-      <trkpt lat="38.964183" lon="-77.072309">
-        <time>2026-04-15T15:02:37.142Z</time>
-      </trkpt>
-      <trkpt lat="38.963037" lon="-77.071631">
-        <time>2026-04-15T15:02:52.857Z</time>
-      </trkpt>
-      <trkpt lat="38.961891" lon="-77.070954">
-        <time>2026-04-15T15:03:08.571Z</time>
-      </trkpt>
-      <trkpt lat="38.960746" lon="-77.070277">
-        <time>2026-04-15T15:03:24.285Z</time>
-      </trkpt>
-      <trkpt lat="38.959600" lon="-77.069600">
-        <time>2026-04-15T15:03:40.000Z</time>
-      </trkpt>
-      <trkpt lat="38.957329" lon="-77.068671">
-        <time>2026-04-15T15:03:55.714Z</time>
-      </trkpt>
-      <trkpt lat="38.955057" lon="-77.067743">
-        <time>2026-04-15T15:04:11.428Z</time>
-      </trkpt>
-      <trkpt lat="38.952786" lon="-77.066814">
-        <time>2026-04-15T15:04:27.142Z</time>
-      </trkpt>
-      <trkpt lat="38.950514" lon="-77.065886">
-        <time>2026-04-15T15:04:42.857Z</time>
-      </trkpt>
-      <trkpt lat="38.948243" lon="-77.064957">
-        <time>2026-04-15T15:04:58.571Z</time>
-      </trkpt>
-      <trkpt lat="38.945971" lon="-77.064029">
-        <time>2026-04-15T15:05:14.285Z</time>
-      </trkpt>
-      <trkpt lat="38.943700" lon="-77.063100">
-        <time>2026-04-15T15:05:30.000Z</time>
-      </trkpt>
-      <trkpt lat="38.942514" lon="-77.062386">
-        <time>2026-04-15T15:05:45.714Z</time>
-      </trkpt>
-      <trkpt lat="38.941329" lon="-77.061671">
-        <time>2026-04-15T15:06:01.428Z</time>
-      </trkpt>
-      <trkpt lat="38.940143" lon="-77.060957">
-        <time>2026-04-15T15:06:17.142Z</time>
-      </trkpt>
-      <trkpt lat="38.938957" lon="-77.060243">
-        <time>2026-04-15T15:06:32.857Z</time>
-      </trkpt>
-      <trkpt lat="38.937771" lon="-77.059529">
-        <time>2026-04-15T15:06:48.571Z</time>
-      </trkpt>
-      <trkpt lat="38.936586" lon="-77.058814">
-        <time>2026-04-15T15:07:04.285Z</time>
-      </trkpt>
-      <trkpt lat="38.935400" lon="-77.058100">
-        <time>2026-04-15T15:07:20.000Z</time>
-      </trkpt>
-      <trkpt lat="38.934571" lon="-77.056857">
-        <time>2026-04-15T15:07:35.714Z</time>
-      </trkpt>
-      <trkpt lat="38.933743" lon="-77.055614">
-        <time>2026-04-15T15:07:51.428Z</time>
-      </trkpt>
-      <trkpt lat="38.932914" lon="-77.054371">
-        <time>2026-04-15T15:08:07.142Z</time>
-      </trkpt>
-      <trkpt lat="38.932086" lon="-77.053129">
-        <time>2026-04-15T15:08:22.857Z</time>
-      </trkpt>
-      <trkpt lat="38.931257" lon="-77.051886">
-        <time>2026-04-15T15:08:38.571Z</time>
-      </trkpt>
-      <trkpt lat="38.930429" lon="-77.050643">
-        <time>2026-04-15T15:08:54.285Z</time>
-      </trkpt>
-      <trkpt lat="38.929600" lon="-77.049400">
-        <time>2026-04-15T15:09:10.000Z</time>
-      </trkpt>
-      <trkpt lat="38.928414" lon="-77.049043">
-        <time>2026-04-15T15:09:25.714Z</time>
-      </trkpt>
-      <trkpt lat="38.927229" lon="-77.048686">
-        <time>2026-04-15T15:09:41.428Z</time>
-      </trkpt>
-      <trkpt lat="38.926043" lon="-77.048329">
-        <time>2026-04-15T15:09:57.142Z</time>
-      </trkpt>
-      <trkpt lat="38.924857" lon="-77.047971">
-        <time>2026-04-15T15:10:12.857Z</time>
-      </trkpt>
-      <trkpt lat="38.923671" lon="-77.047614">
-        <time>2026-04-15T15:10:28.571Z</time>
-      </trkpt>
-      <trkpt lat="38.922486" lon="-77.047257">
-        <time>2026-04-15T15:10:44.285Z</time>
-      </trkpt>
-      <trkpt lat="38.921300" lon="-77.046900">
-        <time>2026-04-15T15:11:00.000Z</time>
-      </trkpt>
-      <trkpt lat="38.919643" lon="-77.046371">
-        <time>2026-04-15T15:11:15.714Z</time>
-      </trkpt>
-      <trkpt lat="38.917986" lon="-77.045843">
-        <time>2026-04-15T15:11:31.428Z</time>
-      </trkpt>
-      <trkpt lat="38.916329" lon="-77.045314">
-        <time>2026-04-15T15:11:47.142Z</time>
-      </trkpt>
-      <trkpt lat="38.914671" lon="-77.044786">
-        <time>2026-04-15T15:12:02.857Z</time>
-      </trkpt>
-      <trkpt lat="38.913014" lon="-77.044257">
-        <time>2026-04-15T15:12:18.571Z</time>
-      </trkpt>
-      <trkpt lat="38.911357" lon="-77.043729">
-        <time>2026-04-15T15:12:34.285Z</time>
-      </trkpt>
-      <trkpt lat="38.909700" lon="-77.043200">
-        <time>2026-04-15T15:12:50.000Z</time>
-      </trkpt>
-      <trkpt lat="38.908600" lon="-77.042657">
-        <time>2026-04-15T15:13:05.714Z</time>
-      </trkpt>
-      <trkpt lat="38.907500" lon="-77.042114">
-        <time>2026-04-15T15:13:21.428Z</time>
-      </trkpt>
-      <trkpt lat="38.906400" lon="-77.041571">
-        <time>2026-04-15T15:13:37.142Z</time>
-      </trkpt>
-      <trkpt lat="38.905300" lon="-77.041029">
-        <time>2026-04-15T15:13:52.857Z</time>
-      </trkpt>
-      <trkpt lat="38.904200" lon="-77.040486">
-        <time>2026-04-15T15:14:08.571Z</time>
-      </trkpt>
-      <trkpt lat="38.903100" lon="-77.039943">
-        <time>2026-04-15T15:14:24.285Z</time>
-      </trkpt>
-      <trkpt lat="38.902000" lon="-77.039400">
-        <time>2026-04-15T15:14:40.000Z</time>
-      </trkpt>
-      <trkpt lat="38.902000" lon="-77.039400">
-        <time>2026-04-15T15:15:25.714Z</time>
-      </trkpt>
-    </trkseg>
-  </trk>
+<?xml version="1.0"?>
+<gpx version="1.1" creator="DriveByCurio">
+  <wpt lat="38.984730" lon="-77.094250"><time>2026-04-15T15:00:00Z</time><name>Bethesda Metro</name></wpt>
+  <wpt lat="38.982286" lon="-77.091406"><time>2026-04-15T15:00:16Z</time></wpt>
+  <wpt lat="38.979841" lon="-77.088561"><time>2026-04-15T15:00:31Z</time></wpt>
+  <wpt lat="38.977397" lon="-77.085717"><time>2026-04-15T15:00:47Z</time></wpt>
+  <wpt lat="38.974953" lon="-77.082873"><time>2026-04-15T15:01:03Z</time></wpt>
+  <wpt lat="38.972509" lon="-77.080029"><time>2026-04-15T15:01:19Z</time></wpt>
+  <wpt lat="38.970064" lon="-77.077184"><time>2026-04-15T15:01:34Z</time></wpt>
+  <wpt lat="38.967620" lon="-77.074340"><time>2026-04-15T15:01:50Z</time><name>Chevy Chase Circle</name></wpt>
+  <wpt lat="38.966474" lon="-77.073663"><time>2026-04-15T15:02:06Z</time></wpt>
+  <wpt lat="38.965329" lon="-77.072986"><time>2026-04-15T15:02:21Z</time></wpt>
+  <wpt lat="38.964183" lon="-77.072309"><time>2026-04-15T15:02:37Z</time></wpt>
+  <wpt lat="38.963037" lon="-77.071631"><time>2026-04-15T15:02:53Z</time></wpt>
+  <wpt lat="38.961891" lon="-77.070954"><time>2026-04-15T15:03:09Z</time></wpt>
+  <wpt lat="38.960746" lon="-77.070277"><time>2026-04-15T15:03:24Z</time></wpt>
+  <wpt lat="38.959600" lon="-77.069600"><time>2026-04-15T15:03:40Z</time><name>Chevy Chase DC</name></wpt>
+  <wpt lat="38.957329" lon="-77.068671"><time>2026-04-15T15:03:56Z</time></wpt>
+  <wpt lat="38.955057" lon="-77.067743"><time>2026-04-15T15:04:11Z</time></wpt>
+  <wpt lat="38.952786" lon="-77.066814"><time>2026-04-15T15:04:27Z</time></wpt>
+  <wpt lat="38.950514" lon="-77.065886"><time>2026-04-15T15:04:43Z</time></wpt>
+  <wpt lat="38.948243" lon="-77.064957"><time>2026-04-15T15:04:59Z</time></wpt>
+  <wpt lat="38.945971" lon="-77.064029"><time>2026-04-15T15:05:14Z</time></wpt>
+  <wpt lat="38.943700" lon="-77.063100"><time>2026-04-15T15:05:30Z</time><name>Van Ness / UDC</name></wpt>
+  <wpt lat="38.942514" lon="-77.062386"><time>2026-04-15T15:05:46Z</time></wpt>
+  <wpt lat="38.941329" lon="-77.061671"><time>2026-04-15T15:06:01Z</time></wpt>
+  <wpt lat="38.940143" lon="-77.060957"><time>2026-04-15T15:06:17Z</time></wpt>
+  <wpt lat="38.938957" lon="-77.060243"><time>2026-04-15T15:06:33Z</time></wpt>
+  <wpt lat="38.937771" lon="-77.059529"><time>2026-04-15T15:06:49Z</time></wpt>
+  <wpt lat="38.936586" lon="-77.058814"><time>2026-04-15T15:07:04Z</time></wpt>
+  <wpt lat="38.935400" lon="-77.058100"><time>2026-04-15T15:07:20Z</time><name>Cleveland Park</name></wpt>
+  <wpt lat="38.934571" lon="-77.056857"><time>2026-04-15T15:07:36Z</time></wpt>
+  <wpt lat="38.933743" lon="-77.055614"><time>2026-04-15T15:07:51Z</time></wpt>
+  <wpt lat="38.932914" lon="-77.054371"><time>2026-04-15T15:08:07Z</time></wpt>
+  <wpt lat="38.932086" lon="-77.053129"><time>2026-04-15T15:08:23Z</time></wpt>
+  <wpt lat="38.931257" lon="-77.051886"><time>2026-04-15T15:08:39Z</time></wpt>
+  <wpt lat="38.930429" lon="-77.050643"><time>2026-04-15T15:08:54Z</time></wpt>
+  <wpt lat="38.929600" lon="-77.049400"><time>2026-04-15T15:09:10Z</time><name>Woodley Park / Zoo</name></wpt>
+  <wpt lat="38.928414" lon="-77.049043"><time>2026-04-15T15:09:26Z</time></wpt>
+  <wpt lat="38.927229" lon="-77.048686"><time>2026-04-15T15:09:41Z</time></wpt>
+  <wpt lat="38.926043" lon="-77.048329"><time>2026-04-15T15:09:57Z</time></wpt>
+  <wpt lat="38.924857" lon="-77.047971"><time>2026-04-15T15:10:13Z</time></wpt>
+  <wpt lat="38.923671" lon="-77.047614"><time>2026-04-15T15:10:29Z</time></wpt>
+  <wpt lat="38.922486" lon="-77.047257"><time>2026-04-15T15:10:44Z</time></wpt>
+  <wpt lat="38.921300" lon="-77.046900"><time>2026-04-15T15:11:00Z</time><name>Taft Bridge</name></wpt>
+  <wpt lat="38.919643" lon="-77.046371"><time>2026-04-15T15:11:16Z</time></wpt>
+  <wpt lat="38.917986" lon="-77.045843"><time>2026-04-15T15:11:31Z</time></wpt>
+  <wpt lat="38.916329" lon="-77.045314"><time>2026-04-15T15:11:47Z</time></wpt>
+  <wpt lat="38.914671" lon="-77.044786"><time>2026-04-15T15:12:03Z</time></wpt>
+  <wpt lat="38.913014" lon="-77.044257"><time>2026-04-15T15:12:19Z</time></wpt>
+  <wpt lat="38.911357" lon="-77.043729"><time>2026-04-15T15:12:34Z</time></wpt>
+  <wpt lat="38.909700" lon="-77.043200"><time>2026-04-15T15:12:50Z</time><name>Dupont Circle</name></wpt>
+  <wpt lat="38.908600" lon="-77.042657"><time>2026-04-15T15:13:06Z</time></wpt>
+  <wpt lat="38.907500" lon="-77.042114"><time>2026-04-15T15:13:21Z</time></wpt>
+  <wpt lat="38.906400" lon="-77.041571"><time>2026-04-15T15:13:37Z</time></wpt>
+  <wpt lat="38.905300" lon="-77.041029"><time>2026-04-15T15:13:53Z</time></wpt>
+  <wpt lat="38.904200" lon="-77.040486"><time>2026-04-15T15:14:09Z</time></wpt>
+  <wpt lat="38.903100" lon="-77.039943"><time>2026-04-15T15:14:24Z</time></wpt>
+  <wpt lat="38.902000" lon="-77.039400"><time>2026-04-15T15:14:40Z</time><name>Farragut Square</name></wpt>
 </gpx>
