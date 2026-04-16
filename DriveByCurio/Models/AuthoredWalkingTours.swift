@@ -7,7 +7,7 @@ import Foundation
 enum AuthoredWalkingTours {
 
     static var all: [WalkingTour] {
-        [huntingtonBradmoor, mccrillis]
+        [huntingtonBradmoor, mccrillis, rockCreekTrails]
     }
 
     // MARK: - Tour 1: Huntington Terrace & Bradmoor
@@ -292,6 +292,159 @@ enum AuthoredWalkingTours {
             ),
         ],
         createdAt: Date(timeIntervalSince1970: 1744761600),
+        updatedAt: Date(timeIntervalSince1970: 1744761600),
+        isAuthored: true
+    )
+
+    // MARK: - Tour 3: Rock Creek Park Trails
+
+    static let rockCreekTrails = WalkingTour(
+        id: "rock-creek-trails",
+        title: "Where the City Disappears",
+        creatorName: "DriveByCurio",
+        creatorIsLocal: true,
+        description: "A walk along Rock Creek from Boundary Bridge into a forest that makes you forget you're surrounded by a million people. New Deal bridges, fall-zone geology, and an urban wilderness.",
+        tags: ["nature", "history", "neighborhood"],
+        mode: .walking,
+        waypoints: [
+            WalkingWaypoint(
+                id: "rc-01-boundary-bridge",
+                order: 1,
+                lat: 38.96698,
+                lng: -77.05354,
+                title: "Boundary Bridge",
+                description: "Where Maryland meets the District — and the pavement meets the wild",
+                triggerRadiusMeters: 30,
+                contentAudioFile: "content.m4a",
+                navAudioFile: nil,
+                narrationText: """
+                You're standing at Boundary Bridge, and the name is literal — the state line between Maryland and the District of Columbia runs right through here. Step ten feet south and you're in a national park. Step ten feet north and you're in Montgomery County.
+
+                But there's a more dramatic boundary at work. Look south, past the bridge, into the trees. Within about two hundred yards, the suburban world you just drove through — the houses, the strip malls, the traffic — will completely vanish. You'll be in a forest gorge that looks and sounds like the Appalachian foothills. Rock Creek carved this valley over millions of years, cutting through bedrock to create a corridor of wildness that somehow survived the city growing up around it.
+
+                Rock Creek Park was established in 1890 — just the third national park in American history, and the first inside a city. Congress set aside 1,700 acres because they could see what was coming: Washington was booming, and without protection, this creek valley would have been paved over like everything else.
+
+                The bridge you're standing on has its own story. The original Boundary Bridge washed away in the devastating Rock Creek floods of the early 1930s. What you see now was built in 1934 by the Public Works Administration — one of Roosevelt's New Deal programs that put Americans back to work during the Depression. Five footbridges in this park were built by the PWA, and we'll see another one on this walk.
+
+                Let's head south into the trees.
+                """,
+                navInstructionText: nil
+            ),
+            WalkingWaypoint(
+                id: "rc-02-beach-drive",
+                order: 2,
+                lat: 38.96430,
+                lng: -77.05180,
+                title: "Beach Drive: The Road That Became a Trail",
+                description: "Where cars used to go, walkers now own the road",
+                triggerRadiusMeters: 30,
+                contentAudioFile: "content.m4a",
+                navAudioFile: "nav.m4a",
+                narrationText: """
+                You're walking on Beach Drive, and if it feels strange to walk down the middle of a paved road, that's the point. Three sections of Beach Drive in Rock Creek Park are now permanently closed to cars. This stretch is one of them. What was a commuter cut-through for decades is now the widest, smoothest walking and biking path in the District.
+
+                The fight over Beach Drive lasted years. Commuters used it to bypass Connecticut Avenue traffic, turning a park road into a de facto highway. Conservationists argued that a road through the middle of a national park should serve the park, not the commute. During COVID, the road was temporarily closed and people flooded in — runners, families with strollers, cyclists, kids on scooters. The temporary closure became permanent.
+
+                Look at the creek to your left. Rock Creek is a surprisingly serious waterway — it drains seventy-six square miles of Montgomery County and the District. After heavy rains it becomes a torrent, which is why those original bridges washed out in the 1930s. The creek is also an ecological corridor. Fish, birds, deer, foxes, and even the occasional coyote use this valley to move between the suburban parks of Maryland and the Potomac River.
+
+                Notice the rock outcrops along the creek banks. We're approaching something geologically significant — a place where the earth changes underneath you. More on that at the next stop.
+                """,
+                navInstructionText: "Continue south on Beach Drive. The road curves gently with the creek. You'll walk about a quarter mile to the next stop."
+            ),
+            WalkingWaypoint(
+                id: "rc-03-fall-zone",
+                order: 3,
+                lat: 38.96170,
+                lng: -77.05020,
+                title: "The Fall Zone",
+                description: "Standing on the seam between two geologic worlds",
+                triggerRadiusMeters: 30,
+                contentAudioFile: "content.m4a",
+                navAudioFile: "nav.m4a",
+                narrationText: """
+                Right about here, you're standing on one of the most important geologic boundaries on the East Coast. It's called the fall zone — or the fall line — and it's where the hard, ancient rock of the Piedmont Plateau meets the soft, young sediment of the Atlantic Coastal Plain.
+
+                Look at the creek bed. Upstream, toward Maryland, the rocks are harder — metamorphic schist and gneiss, hundreds of millions of years old. Downstream, toward the Potomac, the ground softens into sand, gravel, and clay deposited by ancient seas. The fall zone is where the creek drops over that transition, creating the rapids and small cascades you can see and hear.
+
+                This boundary shaped American history. Every major city on the East Coast — from Trenton to Richmond to Augusta — sits on the fall line. Why? Because the falls were the farthest point inland that ships could navigate. Goods had to be unloaded and portaged around the rapids, so trading posts, then towns, then cities grew up at those transfer points. Washington itself exists where it does partly because of the falls of the Potomac, just a few miles downstream from here.
+
+                The geology also explains why Rock Creek cut such a deep valley. The creek is working through that hard Piedmont rock, which resists erosion — so instead of spreading out into a wide, gentle floodplain, the water carved a narrow gorge. That's why it feels like a mountain hollow in here, even though you're five miles from the White House.
+                """,
+                navInstructionText: "Keep heading south along Beach Drive. Look for a stone and concrete footbridge crossing the creek ahead — that's Rolling Meadow Bridge."
+            ),
+            WalkingWaypoint(
+                id: "rc-04-rolling-meadow",
+                order: 4,
+                lat: 38.95870,
+                lng: -77.04880,
+                title: "Rolling Meadow Bridge",
+                description: "A Depression-era bridge built to look like it grew here",
+                triggerRadiusMeters: 30,
+                contentAudioFile: "content.m4a",
+                navAudioFile: "nav.m4a",
+                narrationText: """
+                This is Rolling Meadow Bridge, and it's a small masterpiece of a style called parkitecture — architecture designed to disappear into the landscape. Look at how it's built: concrete and local stone, with proportions that echo the boulders in the creek. The handrails were originally wood. Nothing about it screams "engineered structure." It looks like it could have grown here.
+
+                Rolling Meadow Bridge was built in 1934 or '35 as part of the Public Works Administration program that also rebuilt Boundary Bridge where we started. The PWA hired local workers — many of them unemployed men desperate for any job during the Depression — to replace the bridges that the 1930s floods had destroyed.
+
+                A government report from 1939 called these bridges an "advance in small-bridge design in our national parks." That matters because the design philosophy developed here — rustic materials, natural proportions, minimal visual impact — became the template for National Park architecture across the country. The stone-and-timber lodges in Yellowstone and Yosemite followed the same principles. Rock Creek Park was a testing ground.
+
+                Meanwhile, just up the hill from here, the Civilian Conservation Corps — the CCC, another New Deal program — was building the bridle paths and hiking trails that became today's trail network. More than two miles of trail were constructed by young men in CCC camps. You're walking on their work.
+
+                Take a moment on the bridge. Look upstream and downstream. The creek is framed perfectly from here — that's not an accident. These bridges were placed at scenic viewpoints. The engineers were designing experiences, not just infrastructure.
+                """,
+                navInstructionText: "Cross the bridge and continue south along the trail. The path gets more wooded and quieter here. About a quarter mile to our turnaround point."
+            ),
+            WalkingWaypoint(
+                id: "rc-05-deep-woods",
+                order: 5,
+                lat: 38.95580,
+                lng: -77.04780,
+                title: "The Urban Wilderness",
+                description: "A forest that makes you forget the city exists",
+                triggerRadiusMeters: 35,
+                contentAudioFile: "content.m4a",
+                navAudioFile: "nav.m4a",
+                narrationText: """
+                Stop here and just listen for a moment.
+
+                If you came at the right time — a weekday morning, or early on a weekend — you might hear almost nothing human. No traffic. No sirens. No airplanes on final approach to Reagan National. Just water over rocks, wind in canopy, and birds. The pileated woodpecker lives in these woods — that's the big one, the size of a crow, with a red crest like a cartoon. If you hear a rhythmic hammering that sounds way too loud, that's him.
+
+                Theodore Roosevelt used to hike this exact stretch of trail. Not symbolically — literally. As president, he'd slip away from the White House with a few friends, ride out to Rock Creek Park, and scramble through the gorge. He called it his "point-to-point walk" — you picked a destination and went straight there, over or through whatever was in the way. Rock scrambles, creek crossings, fallen trees. His Secret Service detail reportedly hated it.
+
+                Roosevelt's connection to this place matters because he later became the president most responsible for the national park system. Some historians argue that his afternoons bashing through Rock Creek Park helped shape his conservation philosophy. If a wild creek gorge could survive inside a national capital, then surely the great wildernesses of the West deserved protection too.
+
+                Look at the trees around you. The oaks and tulip poplars here are sixty, eighty, some maybe a hundred years old. This forest has been regenerating since the park was established in 1890. Before that, much of this valley was cleared for mills — there were dozens of water-powered mills on Rock Creek in the 1800s. The forest you're standing in is a second-growth comeback story, and it's still getting older and wilder every year.
+
+                This is our turnaround point. We'll head back north along the same route, but I have one more thing to show you.
+                """,
+                navInstructionText: "Turn around and head back north the way we came. We'll follow Beach Drive back toward Boundary Bridge. Enjoy the walk — you'll notice different things heading in this direction."
+            ),
+            WalkingWaypoint(
+                id: "rc-06-return",
+                order: 6,
+                lat: 38.96550,
+                lng: -77.05280,
+                title: "The Creek's Future",
+                description: "What it means to have wilderness inside a city",
+                triggerRadiusMeters: 35,
+                contentAudioFile: "content.m4a",
+                navAudioFile: nil,
+                narrationText: """
+                As you walk these last few hundred yards back to Boundary Bridge, I want to leave you with something to think about.
+
+                Rock Creek is getting cleaner. For most of the twentieth century, it was badly polluted — stormwater runoff carried fertilizers, motor oil, and sewage into the creek. Fish populations collapsed. Swimming, which was common here in the early 1900s, became unthinkable. But over the past two decades, Montgomery County and the District have invested hundreds of millions of dollars in stormwater management — bioswales, rain gardens, permeable pavement, stream restoration. The creek isn't pristine, but herring and shad have returned to spawn. That fish ladder at Peirce Mill, a couple miles downstream, helps them get past the dam. Life is coming back.
+
+                At the same time, the park faces new pressures. Climate change is shifting rainfall patterns — more intense storms mean more flooding and erosion. Invasive species like English ivy, porcelain berry, and stilt grass are overwhelming native plants in places. And the park's popularity, especially since Beach Drive closed to cars, means more foot traffic on trails that weren't designed for it.
+
+                But here's what strikes me most. You just walked less than two miles from a suburban parking lot, and you were in a forest gorge that felt genuinely wild. A million people live within ten miles of where you're standing, and almost none of them were in that gorge with you. Rock Creek Park is one of the great hidden landscapes of the Eastern United States — not because it's remote, but because it's so improbably close.
+
+                Thank you for walking with me. Come back in a different season — this valley is a completely different place in every one of them.
+                """,
+                navInstructionText: nil
+            ),
+        ],
+        createdAt: Date(timeIntervalSince1970: 1744761600), // 2025-04-16
         updatedAt: Date(timeIntervalSince1970: 1744761600),
         isAuthored: true
     )

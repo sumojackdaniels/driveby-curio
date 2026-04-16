@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<gpx version="1.1" creator="DriveByCurio">
+  <wpt lat="38.96698" lon="-77.05354">
+    <name>1 - Boundary Bridge</name>
+  </wpt>
+  <wpt lat="38.96600" lon="-77.05300">
+    <name>1-2 interp</name>
+  </wpt>
+  <wpt lat="38.96500" lon="-77.05230">
+    <name>1-2 interp2</name>
+  </wpt>
+  <wpt lat="38.96430" lon="-77.05180">
+    <name>2 - Beach Drive</name>
+  </wpt>
+  <wpt lat="38.96350" lon="-77.05120">
+    <name>2-3 interp</name>
+  </wpt>
+  <wpt lat="38.96260" lon="-77.05070">
+    <name>2-3 interp2</name>
+  </wpt>
+  <wpt lat="38.96170" lon="-77.05020">
+    <name>3 - Fall Zone</name>
+  </wpt>
+  <wpt lat="38.96070" lon="-77.04960">
+    <name>3-4 interp</name>
+  </wpt>
+  <wpt lat="38.95970" lon="-77.04920">
+    <name>3-4 interp2</name>
+  </wpt>
+  <wpt lat="38.95870" lon="-77.04880">
+    <name>4 - Rolling Meadow Bridge</name>
+  </wpt>
+  <wpt lat="38.95770" lon="-77.04840">
+    <name>4-5 interp</name>
+  </wpt>
+  <wpt lat="38.95670" lon="-77.04810">
+    <name>4-5 interp2</name>
+  </wpt>
+  <wpt lat="38.95580" lon="-77.04780">
+    <name>5 - Deep Woods (turnaround)</name>
+  </wpt>
+  <wpt lat="38.95670" lon="-77.04810">
+    <name>5-6 return1</name>
+  </wpt>
+  <wpt lat="38.95770" lon="-77.04840">
+    <name>5-6 return2</name>
+  </wpt>
+  <wpt lat="38.95870" lon="-77.04880">
+    <name>5-6 return3</name>
+  </wpt>
+  <wpt lat="38.95970" lon="-77.04920">
+    <name>5-6 return4</name>
+  </wpt>
+  <wpt lat="38.96070" lon="-77.04960">
+    <name>5-6 return5</name>
+  </wpt>
+  <wpt lat="38.96170" lon="-77.05020">
+    <name>5-6 return6</name>
+  </wpt>
+  <wpt lat="38.96260" lon="-77.05070">
+    <name>5-6 return7</name>
+  </wpt>
+  <wpt lat="38.96350" lon="-77.05130">
+    <name>5-6 return8</name>
+  </wpt>
+  <wpt lat="38.96450" lon="-77.05200">
+    <name>5-6 return9</name>
+  </wpt>
+  <wpt lat="38.96550" lon="-77.05280">
+    <name>6 - The Creek s Future</name>
+  </wpt>
+</gpx>
