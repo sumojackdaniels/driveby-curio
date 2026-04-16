@@ -29,10 +29,6 @@ targets:
       - path: DriveByCurio
         excludes:
           - "**/*.md"
-          - "WalkingTours/**"
-      - path: DriveByCurio/WalkingTours
-        type: folder
-        buildPhase: resources
     entitlements:
       path: DriveByCurio/Entitlements.plist
       properties:
