@@ -10,6 +10,7 @@ import CoreSwift
 
 struct WaypointMapEditorView: View {
     @State var tour: WalkingTour
+    var onSaved: (() -> Void)?
     @Environment(WalkingTourStore.self) var tourStore
     @Environment(LocationService.self) var locationService
     @Environment(\.dismiss) var dismiss
@@ -23,11 +24,11 @@ struct WaypointMapEditorView: View {
         ))
     )
     @State private var hasCenteredOnUser = false
-    @State private var editingWaypoint: WalkingWaypoint?
-    @State private var showWaypointEditor = false
+    @State private var editingWaypointID: String?
     @State private var showSaveConfirmation = false
     @State private var showLocationDeniedAlert = false
     @State private var showNoLocationToast = false
+    @State private var showDebugNoLocationAlert = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -42,8 +43,7 @@ struct WaypointMapEditorView: View {
                             hasAudio: wp.contentAudioFile != nil
                         )
                         .onTapGesture {
-                            editingWaypoint = wp
-                            showWaypointEditor = true
+                            editingWaypointID = wp.id
                         }
                     }
                 }
@@ -120,26 +120,41 @@ struct WaypointMapEditorView: View {
         .onAppear {
             requestLocationIfNeeded()
         }
-        .sheet(isPresented: $showWaypointEditor) {
-            if let wp = editingWaypoint, let index = tour.waypoints.firstIndex(where: { $0.id == wp.id }) {
+        .sheet(isPresented: Binding(
+            get: { editingWaypointID != nil },
+            set: { if !$0 { editingWaypointID = nil } }
+        )) {
+            if let id = editingWaypointID,
+               let index = tour.waypoints.firstIndex(where: { $0.id == id }) {
                 WaypointEditorView(
                     waypoint: $tour.waypoints[index],
                     tourId: tour.id,
                     onDelete: {
-                        tour.waypoints.removeAll { $0.id == wp.id }
+                        tour.waypoints.removeAll { $0.id == id }
                         reorderWaypoints()
-                        showWaypointEditor = false
+                        editingWaypointID = nil
                     }
                 )
             }
         }
         .alert("Tour Saved!", isPresented: $showSaveConfirmation) {
             Button("OK") {
-                dismiss()
+                if let onSaved {
+                    onSaved()
+                } else {
+                    dismiss()
+                }
             }
         } message: {
             Text("\"\(tour.title)\" with \(tour.waypoints.count) stops has been saved. You can find it in the tour browser.")
         }
+        #if DEBUG
+        .alert("No Location Data", isPresented: $showDebugNoLocationAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Location permission is granted but no GPS fix is available. On the simulator, use Debug → Simulate Location or load a GPX file to provide a location.")
+        }
+        #endif
         .alert("Location Access Required", isPresented: $showLocationDeniedAlert) {
             Button("Open Settings") {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -168,12 +183,25 @@ struct WaypointMapEditorView: View {
 
     private func addWaypointAtCurrentLocation() {
         guard let location = locationService.currentLocation else {
-            // Show a brief toast instead of silently failing
+            #if DEBUG
+            if locationService.authorizationStatus == .authorizedWhenInUse
+                || locationService.authorizationStatus == .authorizedAlways {
+                // Location is authorized but no fix yet — likely simulator without simulated location
+                showDebugNoLocationAlert = true
+            } else {
+                showNoLocationToast = true
+                Task {
+                    try? await Task.sleep(for: .seconds(2))
+                    showNoLocationToast = false
+                }
+            }
+            #else
             showNoLocationToast = true
             Task {
                 try? await Task.sleep(for: .seconds(2))
                 showNoLocationToast = false
             }
+            #endif
             return
         }
 
@@ -197,8 +225,7 @@ struct WaypointMapEditorView: View {
         tour.waypoints.append(waypoint)
 
         // Open editor for the new waypoint
-        editingWaypoint = waypoint
-        showWaypointEditor = true
+        editingWaypointID = waypoint.id
     }
 
     private func reorderWaypoints() {

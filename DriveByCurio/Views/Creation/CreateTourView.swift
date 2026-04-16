@@ -79,7 +79,7 @@ struct CreateTourView: View {
             }
             .navigationDestination(isPresented: $showMapEditor) {
                 if let tour = tour {
-                    WaypointMapEditorView(tour: tour)
+                    WaypointMapEditorView(tour: tour, onSaved: { dismiss() })
                 }
             }
         }
