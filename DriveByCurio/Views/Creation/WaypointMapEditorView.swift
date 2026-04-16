@@ -21,12 +21,6 @@ struct WaypointMapEditorView: View {
     @State private var showLocationDeniedAlert = false
     @State private var showNoLocationToast = false
 
-    private var locationAvailable: Bool {
-        let status = locationService.authorizationStatus
-        return (status == .authorizedWhenInUse || status == .authorizedAlways)
-            && locationService.currentLocation != nil
-    }
-
     var body: some View {
         ZStack(alignment: .bottom) {
             // Map
@@ -56,13 +50,6 @@ struct WaypointMapEditorView: View {
             .mapControls {
                 MapUserLocationButton()
                 MapCompass()
-            }
-
-            // Location permission overlay
-            if locationService.authorizationStatus == .denied || locationService.authorizationStatus == .restricted {
-                locationDeniedOverlay
-            } else if locationService.authorizationStatus == .notDetermined {
-                locationPromptOverlay
             }
 
             // Bottom controls (only when location is authorized)
@@ -157,59 +144,6 @@ struct WaypointMapEditorView: View {
         } message: {
             Text("DriveByCurio needs your location to drop pins where you're standing. Please enable Location Services in Settings.")
         }
-    }
-
-    // MARK: - Location overlays
-
-    private var locationDeniedOverlay: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "location.slash.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(.red.opacity(0.7))
-
-            Text("Location Access Denied")
-                .font(.title3.weight(.bold))
-
-            Text("DriveByCurio needs your location to place tour stops. Enable location access in Settings to continue.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            Button {
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                }
-            } label: {
-                Label("Open Settings", systemImage: "gear")
-                    .font(.headline)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 14)
-                    .background(.blue)
-                    .foregroundStyle(.white)
-                    .clipShape(Capsule())
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.ultraThinMaterial)
-    }
-
-    private var locationPromptOverlay: some View {
-        VStack(spacing: 16) {
-            ProgressView()
-                .controlSize(.large)
-
-            Text("Requesting Location Access...")
-                .font(.headline)
-
-            Text("Tap \"Allow While Using App\" when prompted.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.ultraThinMaterial)
     }
 
     private func requestLocationIfNeeded() {
