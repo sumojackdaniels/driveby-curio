@@ -236,6 +236,28 @@ A 6-stop botanical walk through a 5-acre shade garden on Inverness Drive.
    Winter bark and structure, spring ephemerals, summer foliage, fall color.
    Why the best gardens are designed for 12 months, not 3.
 
+## TODO / Next
+
+### Design
+- [ ] Total design sprint in Figma — full UI pass across all screens
+
+### Features
+- [ ] Research embedding turn-by-turn navigation more tightly (compass alone is
+      insufficient when there are turns involved)
+- [ ] Add transcript/captions to audio tours (accessibility + reading preference)
+- [ ] Save tour progress if you leave — distinguish "leave" vs "end" so users
+      can resume where they left off
+- [ ] Navigate to first/next stop — offer directions to the starting point before
+      the tour begins
+- [ ] Street view on arrival — show imagery when you reach a waypoint
+- [ ] Walking/biking should be checkboxes not a toggle (a tour could be both)
+
+### Bugs (fixed in v1.1)
+- [x] Map spinner in create tour flow was unobvious and spun forever when location
+      unavailable — replaced with explicit permission prompting and error states
+- [x] Location access not prompted in create tour flow — added permission request
+      on appear and denied-state flow to Settings
+
 ## Assumptions
 
 1. **"When In Use" location only** — no geofences, no Always permission. If the user
