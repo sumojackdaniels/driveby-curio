@@ -65,8 +65,8 @@ targets:
         UIBackgroundModes:
           - location
           - audio
-        NSLocationWhenInUseUsageDescription: "DriveByCurio uses your location to find interesting places nearby."
-        NSLocationAlwaysAndWhenInUseUsageDescription: "DriveByCurio uses your location in the background to announce nearby points of interest while you drive."
+        NSLocationWhenInUseUsageDescription: "DriveByCurio uses your location to play audio stories about the places you're passing on a guided tour."
+        NSLocationAlwaysAndWhenInUseUsageDescription: "DriveByCurio plays audio stories about places along your tour route even when the app is in the background — for example, while Apple Maps is showing directions on your CarPlay screen."
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UIRequiresFullScreen: true

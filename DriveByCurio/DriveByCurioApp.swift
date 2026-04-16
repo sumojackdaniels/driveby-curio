@@ -8,8 +8,8 @@ struct DriveByCurioApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(appState.topicsStore)
-                .environment(appState.poiStore)
+                .environment(appState.tourCatalogStore)
+                .environment(appState.tourPlayer)
                 .environment(appState.locationService)
         }
     }
