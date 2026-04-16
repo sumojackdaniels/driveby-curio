@@ -41,7 +41,7 @@ final class WalkingTourPlayer: NSObject {
     private(set) var playbackMode: WalkingPlaybackMode = .listening
 
     // Compass / wayfinding
-    private(set) var currentHeading: CLHeading?
+    private(set) var currentTrueHeading: Double = 0
     private(set) var bearingToNextStop: Double = 0
     private(set) var distanceToNextStop: Double = 0
     private(set) var walkingRoute: MKRoute?
@@ -457,9 +457,9 @@ final class WalkingTourPlayer: NSObject {
 
 extension WalkingTourPlayer: CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-        let heading = newHeading
+        let trueHeading = newHeading.trueHeading
         Task { @MainActor in
-            self.currentHeading = heading
+            self.currentTrueHeading = trueHeading
         }
     }
 }

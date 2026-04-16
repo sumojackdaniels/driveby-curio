@@ -163,7 +163,7 @@ struct WalkingTourPlaybackView: View {
                 VStack(spacing: 8) {
                     CompassArrowView(
                         bearing: player.bearingToNextStop,
-                        heading: player.currentHeading?.trueHeading ?? 0
+                        heading: player.currentTrueHeading
                     )
                     .frame(width: 120, height: 120)
 
