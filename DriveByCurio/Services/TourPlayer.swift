@@ -162,7 +162,14 @@ final class TourPlayer: NSObject {
         let nextWp = tour.waypoints[nextIndex]
         let distance = location.distance(from: nextWp.clLocation)
 
+        // Debug: print current position and distance to next waypoint every ~10 seconds
+        let tick = Int(Date().timeIntervalSince1970) % 10
+        if tick == 0 {
+            print("📍 Location: \(String(format: "%.5f", location.coordinate.latitude)), \(String(format: "%.5f", location.coordinate.longitude)) → next stop [\(nextIndex)] \"\(nextWp.title)\" is \(Int(distance))m away (trigger: \(Int(nextWp.trigger_radius_m))m)")
+        }
+
         if distance <= nextWp.trigger_radius_m {
+            print("🎯 TRIGGERED: entering \"\(nextWp.title)\" at \(Int(distance))m")
             advanceWaypoint()
         }
     }
