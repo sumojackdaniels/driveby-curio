@@ -29,6 +29,11 @@ targets:
       - path: DriveByCurio
         excludes:
           - "**/*.md"
+          - "WalkingTours/**"
+    resources:
+      - path: DriveByCurio/WalkingTours
+        buildPhase: resources
+        optional: true
     entitlements:
       path: DriveByCurio/Entitlements.plist
       properties:
@@ -67,6 +72,7 @@ targets:
           - audio
         NSLocationWhenInUseUsageDescription: "DriveByCurio uses your location to play audio stories about the places you're passing on a guided tour."
         NSLocationAlwaysAndWhenInUseUsageDescription: "DriveByCurio plays audio stories about places along your tour route even when the app is in the background — for example, while Apple Maps is showing directions on your CarPlay screen."
+        NSMicrophoneUsageDescription: "DriveByCurio uses the microphone so you can record audio narration for tours you create."
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UIRequiresFullScreen: true

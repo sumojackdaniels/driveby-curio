@@ -11,6 +11,8 @@ struct DriveByCurioApp: App {
                 .environment(appState.tourCatalogStore)
                 .environment(appState.tourPlayer)
                 .environment(appState.locationService)
+                .environment(appState.walkingTourStore)
+                .environment(appState.walkingTourPlayer)
         }
     }
 }

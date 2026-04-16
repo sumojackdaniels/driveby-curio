@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<gpx version="1.1" creator="DriveByCurio">
+  <!-- Huntington Terrace & Bradmoor walking tour — 6 stops -->
+  <!-- ~20 sec between intermediate points, simulating a walking pace -->
+  <wpt lat="38.99340" lon="-77.11880"><time>2026-04-16T10:00:00Z</time><name>Stop 1: Starting Point</name></wpt>
+  <wpt lat="38.99360" lon="-77.11700"><time>2026-04-16T10:00:30Z</time></wpt>
+  <wpt lat="38.99380" lon="-77.11520"><time>2026-04-16T10:01:00Z</time></wpt>
+  <wpt lat="38.99400" lon="-77.11400"><time>2026-04-16T10:01:30Z</time></wpt>
+  <wpt lat="38.99410" lon="-77.11320"><time>2026-04-16T10:02:00Z</time><name>Stop 2: Colonial Revival</name></wpt>
+  <wpt lat="38.99450" lon="-77.11400"><time>2026-04-16T10:02:30Z</time></wpt>
+  <wpt lat="38.99520" lon="-77.11550"><time>2026-04-16T10:03:00Z</time></wpt>
+  <wpt lat="38.99600" lon="-77.11700"><time>2026-04-16T10:03:30Z</time></wpt>
+  <wpt lat="38.99670" lon="-77.11830"><time>2026-04-16T10:04:00Z</time></wpt>
+  <wpt lat="38.99720" lon="-77.11940"><time>2026-04-16T10:04:30Z</time><name>Stop 3: Bradmoor</name></wpt>
+  <wpt lat="38.99740" lon="-77.12000"><time>2026-04-16T10:05:00Z</time></wpt>
+  <wpt lat="38.99750" lon="-77.12050"><time>2026-04-16T10:05:30Z</time></wpt>
+  <wpt lat="38.99760" lon="-77.12100"><time>2026-04-16T10:06:00Z</time><name>Stop 4: Burning Tree</name></wpt>
+  <wpt lat="38.99650" lon="-77.11950"><time>2026-04-16T10:06:30Z</time></wpt>
+  <wpt lat="38.99500" lon="-77.11750"><time>2026-04-16T10:07:00Z</time></wpt>
+  <wpt lat="38.99380" lon="-77.11600"><time>2026-04-16T10:07:30Z</time></wpt>
+  <wpt lat="38.99270" lon="-77.11450"><time>2026-04-16T10:08:00Z</time><name>Stop 5: Canopy Walk</name></wpt>
+  <wpt lat="38.99240" lon="-77.11350"><time>2026-04-16T10:08:30Z</time></wpt>
+  <wpt lat="38.99210" lon="-77.11230"><time>2026-04-16T10:09:00Z</time></wpt>
+  <wpt lat="38.99180" lon="-77.11100"><time>2026-04-16T10:09:30Z</time><name>Stop 6: Teardown Nation</name></wpt>
+</gpx>

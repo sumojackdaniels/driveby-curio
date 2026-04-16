@@ -3,13 +3,12 @@ import CoreSwift
 
 // Top-level iPhone view.
 //
-// Milestone 1 (curated tours) replaces the old POI/topics-heavy ContentView
-// with a tour browser. The legacy live-mode UI (TopicsEditorView etc.)
-// remains in the codebase but is not currently linked into the navigation —
-// it will come back as a tab once Mode 2 is rebuilt for the Audio category.
+// The main surface is now the walking tour browser. The driving tours
+// (CarPlay) browser is still accessible from the CarPlay scene but
+// isn't the primary iPhone experience anymore.
 struct ContentView: View {
     var body: some View {
-        TourBrowserView()
+        WalkingTourBrowserView()
     }
 }
 
