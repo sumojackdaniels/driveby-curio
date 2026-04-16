@@ -24,7 +24,7 @@ struct LocationStatusView: View {
 
             if locationService.authorizationStatus == .notDetermined {
                 Button("Enable") {
-                    locationService.requestAlwaysAuthorization()
+                    locationService.requestWhenInUseAuthorization()
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)

@@ -155,7 +155,7 @@ struct WaypointMapEditorView: View {
     private func requestLocationIfNeeded() {
         switch locationService.authorizationStatus {
         case .notDetermined:
-            locationService.requestAlwaysAuthorization()
+            locationService.requestWhenInUseAuthorization()
             locationService.startUpdating()
         case .authorizedWhenInUse, .authorizedAlways:
             locationService.startUpdating()
