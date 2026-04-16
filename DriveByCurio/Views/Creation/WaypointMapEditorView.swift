@@ -14,7 +14,15 @@ struct WaypointMapEditorView: View {
     @Environment(LocationService.self) var locationService
     @Environment(\.dismiss) var dismiss
 
-    @State private var cameraPosition: MapCameraPosition = .userLocation(fallback: .automatic)
+    // Start with a real region fallback so the map never shows an infinite spinner.
+    // We re-center on the user once we get a GPS fix.
+    @State private var cameraPosition: MapCameraPosition = .userLocation(
+        fallback: .region(MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: 38.98, longitude: -77.10), // Bethesda default
+            span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+        ))
+    )
+    @State private var hasCenteredOnUser = false
     @State private var editingWaypoint: WalkingWaypoint?
     @State private var showWaypointEditor = false
     @State private var showSaveConfirmation = false
@@ -52,61 +60,59 @@ struct WaypointMapEditorView: View {
                 MapCompass()
             }
 
-            // Bottom controls (only when location is authorized)
-            if locationService.authorizationStatus == .authorizedWhenInUse || locationService.authorizationStatus == .authorizedAlways {
-                VStack(spacing: 12) {
-                    // Toast when GPS not ready yet
-                    if showNoLocationToast {
-                        Text("Waiting for GPS fix...")
-                            .font(.subheadline.weight(.medium))
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(.orange.opacity(0.9), in: Capsule())
+            // Bottom controls
+            VStack(spacing: 12) {
+                // Brief toast when user taps Add Stop but GPS isn't ready
+                if showNoLocationToast {
+                    Text("Waiting for GPS fix...")
+                        .font(.subheadline.weight(.medium))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(.orange.opacity(0.9), in: Capsule())
+                        .foregroundStyle(.white)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+
+                // Waypoint count
+                if !tour.waypoints.isEmpty {
+                    Text("\(tour.waypoints.count) stop\(tour.waypoints.count == 1 ? "" : "s") added")
+                        .font(.subheadline.weight(.medium))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(.regularMaterial, in: Capsule())
+                }
+
+                HStack(spacing: 16) {
+                    // Add Stop button
+                    Button {
+                        addWaypointAtCurrentLocation()
+                    } label: {
+                        Label("Add Stop Here", systemImage: "mappin.and.ellipse")
+                            .font(.headline)
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 14)
+                            .background(.green)
                             .foregroundStyle(.white)
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                            .clipShape(Capsule())
                     }
 
-                    // Waypoint count
+                    // Save button
                     if !tour.waypoints.isEmpty {
-                        Text("\(tour.waypoints.count) stop\(tour.waypoints.count == 1 ? "" : "s") added")
-                            .font(.subheadline.weight(.medium))
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(.regularMaterial, in: Capsule())
-                    }
-
-                    HStack(spacing: 16) {
-                        // Add Stop button
                         Button {
-                            addWaypointAtCurrentLocation()
+                            saveTour()
                         } label: {
-                            Label("Add Stop Here", systemImage: "mappin.and.ellipse")
+                            Label("Save Tour", systemImage: "checkmark.circle.fill")
                                 .font(.headline)
                                 .padding(.horizontal, 24)
                                 .padding(.vertical, 14)
-                                .background(.green)
+                                .background(.blue)
                                 .foregroundStyle(.white)
                                 .clipShape(Capsule())
                         }
-
-                        // Save button
-                        if !tour.waypoints.isEmpty {
-                            Button {
-                                saveTour()
-                            } label: {
-                                Label("Save Tour", systemImage: "checkmark.circle.fill")
-                                    .font(.headline)
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 14)
-                                    .background(.blue)
-                                    .foregroundStyle(.white)
-                                    .clipShape(Capsule())
-                            }
-                        }
                     }
                 }
-                .padding(.bottom, 24)
             }
+            .padding(.bottom, 24)
         }
         .animation(.easeInOut(duration: 0.3), value: showNoLocationToast)
         .navigationTitle(tour.title)
