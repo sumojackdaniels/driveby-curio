@@ -32,10 +32,6 @@ targets:
           - "WalkingTours"
       - path: DriveByCurio/WalkingTours
         type: folder
-    entitlements:
-      path: DriveByCurio/Entitlements.plist
-      properties:
-        com.apple.developer.carplay-audio: true
     dependencies:
       - package: core-swift
         product: CoreSwift
@@ -49,9 +45,6 @@ targets:
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: M499SW6975
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        # Ad-hoc sign simulator builds so restricted entitlements
-        # (carplay-driving-task) aren't stripped by Automatic signing.
-        "CODE_SIGN_IDENTITY[sdk=iphonesimulator*]": "-"
     info:
       path: DriveByCurio/Info.plist
       properties:
