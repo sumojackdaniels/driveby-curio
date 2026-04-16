@@ -123,7 +123,7 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
         // Push the system Now Playing template on top of the current stack
         // so the driver immediately sees the playback surface.
         let nowPlaying = CPNowPlayingTemplate.shared
-        interfaceController?.pushTemplate(nowPlaying, animated: true)
+        try? await interfaceController?.pushTemplate(nowPlaying, animated: true)
     }
 
     // MARK: - Live placeholder (Mode 2 — coming back later)
@@ -183,7 +183,7 @@ class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
 // MARK: - CPNowPlayingTemplateObserver
 
 extension CarPlaySceneDelegate: CPNowPlayingTemplateObserver {
-    func nowPlayingTemplateUpNextButtonTapped(_ nowPlayingTemplate: CPNowPlayingTemplate) {
+    nonisolated func nowPlayingTemplateUpNextButtonTapped(_ nowPlayingTemplate: CPNowPlayingTemplate) {
         Task { @MainActor in
             self.showUpNextList()
         }
