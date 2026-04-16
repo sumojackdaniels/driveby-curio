@@ -234,7 +234,12 @@ final class TourPlayer: NSObject {
         // For milestone 1 we render a solid-color placeholder; real tour cover
         // art is a follow-up.
         if let placeholder = TourPlayer.makePlaceholderArtwork(title: tour.title) {
-            info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: placeholder.size) { _ in placeholder }
+            // Capture the pre-rendered image by value. The @Sendable annotation
+            // breaks MainActor isolation inheritance so MediaPlayer can call this
+            // on its internal accessQueue without tripping the actor-isolation check.
+            let artworkImage = placeholder
+            let artworkSize = placeholder.size
+            info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: artworkSize) { @Sendable _ in artworkImage }
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
