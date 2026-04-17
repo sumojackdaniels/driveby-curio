@@ -29,7 +29,7 @@ enum TourMode: String, Codable, CaseIterable, Identifiable {
     }
 }
 
-struct WalkingTour: Identifiable, Codable, Equatable {
+struct WalkingTour: Identifiable, Codable, Equatable, Hashable {
     let id: String
     var title: String
     var creatorName: String
@@ -51,6 +51,10 @@ struct WalkingTour: Identifiable, Codable, Equatable {
 
     static func == (lhs: WalkingTour, rhs: WalkingTour) -> Bool {
         lhs.id == rhs.id && lhs.updatedAt == rhs.updatedAt
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 

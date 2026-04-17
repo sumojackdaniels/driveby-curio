@@ -36,9 +36,7 @@ struct WalkingTourBrowserView: View {
 
                         // Hero unit
                         if let hero = heroTour {
-                            NavigationLink {
-                                WalkingTourDetailView(tour: hero)
-                            } label: {
+                            NavigationLink(value: hero) {
                                 TourHeroCard(tour: hero)
                             }
                             .buttonStyle(.plain)
@@ -57,9 +55,7 @@ struct WalkingTourBrowserView: View {
 
                 // Docked playing banner
                 if let activeTour = player.activeTour {
-                    NavigationLink {
-                        WalkingTourDetailView(tour: activeTour)
-                    } label: {
+                    NavigationLink(value: activeTour) {
                         DockedPlayerBanner(
                             tour: activeTour,
                             currentStopIndex: min(player.currentWaypointIndex, activeTour.sortedStops.count - 1),
@@ -70,6 +66,9 @@ struct WalkingTourBrowserView: View {
                 }
             }
             .navigationBarHidden(true)
+            .navigationDestination(for: WalkingTour.self) { tour in
+                WalkingTourDetailView(tour: tour)
+            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -136,9 +135,7 @@ struct WalkingTourBrowserView: View {
             // Feed units
             VStack(spacing: 28) {
                 ForEach(feedTours) { tour in
-                    NavigationLink {
-                        WalkingTourDetailView(tour: tour)
-                    } label: {
+                    NavigationLink(value: tour) {
                         TourFeedCard(tour: tour)
                     }
                     .buttonStyle(.plain)
