@@ -241,7 +241,27 @@ A 6-stop botanical walk through a 5-acre shade garden on Inverness Drive.
 ### Design
 - [ ] Total design sprint in Figma — full UI pass across all screens
 
+### Navigation & Routing (essential)
+- [ ] Support hiking trails — waypoints must follow actual trail paths, not just
+      roads and sidewalks. Research MapKit trail data availability.
+- [ ] Route lines on map must show actual walking/hiking routes (MKDirections),
+      not straight lines between POIs. This applies everywhere routes are shown:
+      route preview, compass mode mini map, tour detail map.
+- [ ] Compass direction should point along the path/road/trail to the next stop,
+      not the straight-line bearing. Use MKRoute step geometry to calculate the
+      heading of the next segment the walker needs to follow.
+- [ ] "Up next" view should show estimated walking time to next stop (from
+      MKRoute expectedTravelTime), not just distance.
+
+### Route Preview & Design
+- [ ] Put serious design thought into the route preview — this is a key moment
+      where someone decides whether to take a tour. Show the route on a map with
+      stop markers, distance, estimated time, elevation profile if possible.
+
 ### Features
+- [ ] Ambient music / playlist while walking between stops — play background
+      music (embedded or user's library?) during compass mode, duck when
+      approaching a trigger circle, fade out when content audio starts
 - [ ] Research embedding turn-by-turn navigation more tightly (compass alone is
       insufficient when there are turns involved)
 - [ ] Add transcript/captions to audio tours (accessibility + reading preference)
