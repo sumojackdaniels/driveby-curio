@@ -60,12 +60,11 @@ struct TourOverviewView: View {
                         .frame(height: 120)
                 }
             }
-            .ignoresSafeArea(edges: .top)
 
             // Docked banner
             dockedBanner
         }
-        .toolbarVisibility(.hidden, for: .navigationBar)
+        .navigationBarHidden(true)
         .fullScreenCover(isPresented: $showSegmentPlayer) {
             if let segment = selectedSegment {
                 SegmentPlayerView(
@@ -82,7 +81,7 @@ struct TourOverviewView: View {
 
     private var heroSection: some View {
         ZStack(alignment: .bottom) {
-            // Photo — extend behind status bar
+            // Photo
             PhotoPlaceholder(
                 label: "\(tour.title) cover",
                 height: TourTokens.heroHeight,
@@ -123,7 +122,7 @@ struct TourOverviewView: View {
                     backButton
                     Spacer()
                 }
-                .padding(.top, 54)
+                .padding(.top, 10)
                 .padding(.leading, 12)
 
                 Spacer()
