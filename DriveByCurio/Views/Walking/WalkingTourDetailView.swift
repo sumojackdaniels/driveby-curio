@@ -17,7 +17,7 @@ struct WalkingTourDetailView: View {
 // Used by TourOverviewView and the creation flow.
 
 struct WaypointPreviewMap: View {
-    let waypoints: [WalkingWaypoint]
+    let waypoints: [TourStop]
 
     var body: some View {
         Map {

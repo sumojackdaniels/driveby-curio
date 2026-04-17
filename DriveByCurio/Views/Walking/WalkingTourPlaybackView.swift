@@ -61,7 +61,7 @@ struct WalkingTourPlaybackView: View {
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
             }
-            Text("Stop \(player.currentWaypointIndex + 1) of \(tour.waypoints.count)")
+            Text("Stop \(player.currentWaypointIndex + 1) of \(tour.stops.count)")
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.white.opacity(0.85))
         }
@@ -306,7 +306,7 @@ struct CompassArrowView: View {
 
 struct WalkingRouteMapView: UIViewRepresentable {
     let route: MKRoute
-    let destination: WalkingWaypoint
+    let destination: TourStop
 
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()

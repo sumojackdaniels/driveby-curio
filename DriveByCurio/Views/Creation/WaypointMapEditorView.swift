@@ -36,11 +36,11 @@ struct WaypointMapEditorView: View {
             Map(position: $cameraPosition) {
                 UserAnnotation()
 
-                ForEach(tour.waypoints) { wp in
+                ForEach(tour.stops) { wp in
                     Annotation(wp.title, coordinate: wp.coordinate) {
                         WaypointMarker(
                             number: wp.order,
-                            hasAudio: wp.contentAudioFile != nil
+                            hasAudio: wp.segments.contains { $0.audioFile != nil }
                         )
                         .onTapGesture {
                             editingWaypointID = wp.id
@@ -49,8 +49,8 @@ struct WaypointMapEditorView: View {
                 }
 
                 // Draw lines between waypoints
-                if tour.waypoints.count >= 2 {
-                    let coords = tour.waypoints.sorted { $0.order < $1.order }.map(\.coordinate)
+                if tour.stops.count >= 2 {
+                    let coords = tour.stops.sorted { $0.order < $1.order }.map(\.coordinate)
                     MapPolyline(coordinates: coords)
                         .stroke(.blue.opacity(0.5), lineWidth: 3)
                 }
@@ -74,8 +74,8 @@ struct WaypointMapEditorView: View {
                 }
 
                 // Waypoint count
-                if !tour.waypoints.isEmpty {
-                    Text("\(tour.waypoints.count) stop\(tour.waypoints.count == 1 ? "" : "s") added")
+                if !tour.stops.isEmpty {
+                    Text("\(tour.stops.count) stop\(tour.stops.count == 1 ? "" : "s") added")
                         .font(.subheadline.weight(.medium))
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
@@ -97,7 +97,7 @@ struct WaypointMapEditorView: View {
                     }
 
                     // Save button
-                    if !tour.waypoints.isEmpty {
+                    if !tour.stops.isEmpty {
                         Button {
                             saveTour()
                         } label: {
@@ -125,12 +125,12 @@ struct WaypointMapEditorView: View {
             set: { if !$0 { editingWaypointID = nil } }
         )) {
             if let id = editingWaypointID,
-               let index = tour.waypoints.firstIndex(where: { $0.id == id }) {
+               let index = tour.stops.firstIndex(where: { $0.id == id }) {
                 WaypointEditorView(
-                    waypoint: $tour.waypoints[index],
+                    waypoint: $tour.stops[index],
                     tourId: tour.id,
                     onDelete: {
-                        tour.waypoints.removeAll { $0.id == id }
+                        tour.stops.removeAll { $0.id == id }
                         reorderWaypoints()
                         editingWaypointID = nil
                     }
@@ -146,7 +146,7 @@ struct WaypointMapEditorView: View {
                 }
             }
         } message: {
-            Text("\"\(tour.title)\" with \(tour.waypoints.count) stops has been saved. You can find it in the tour browser.")
+            Text("\"\(tour.title)\" with \(tour.stops.count) stops has been saved. You can find it in the tour browser.")
         }
         #if DEBUG
         .alert("No Location Data", isPresented: $showDebugNoLocationAlert) {
@@ -205,32 +205,32 @@ struct WaypointMapEditorView: View {
             return
         }
 
-        let waypointId = UUID().uuidString
-        let order = tour.waypoints.count + 1
+        let stopId = UUID().uuidString
+        let order = tour.stops.count + 1
 
-        let waypoint = WalkingWaypoint(
-            id: waypointId,
+        let stop = TourStop(
+            id: stopId,
             order: order,
-            lat: location.coordinate.latitude,
-            lng: location.coordinate.longitude,
             title: "Stop \(order)",
             description: "",
+            address: "",
+            lat: location.coordinate.latitude,
+            lng: location.coordinate.longitude,
             triggerRadiusMeters: 30,
-            contentAudioFile: nil,
+            segments: [],
             navAudioFile: nil,
-            narrationText: nil,
             navInstructionText: nil
         )
 
-        tour.waypoints.append(waypoint)
+        tour.stops.append(stop)
 
-        // Open editor for the new waypoint
-        editingWaypointID = waypoint.id
+        // Open editor for the new stop
+        editingWaypointID = stop.id
     }
 
     private func reorderWaypoints() {
-        for i in tour.waypoints.indices {
-            tour.waypoints[i].order = i + 1
+        for i in tour.stops.indices {
+            tour.stops[i].order = i + 1
         }
     }
 

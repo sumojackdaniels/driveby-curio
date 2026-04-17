@@ -13,7 +13,7 @@ import SwiftUI
 // ZStack overlays rather than custom drawing.
 
 struct StopTimelineRow: View {
-    let stop: WalkingWaypoint
+    let stop: TourStop
     let index: Int
     let totalStops: Int
     let segments: [TourSegment]
@@ -41,9 +41,14 @@ struct StopTimelineRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
-            // Timeline column (dot + line)
-            timelineColumn
-                .frame(width: 34)
+            // Timeline column (dot only — the connecting line is drawn
+            // as a background on the full row so it inherits the row's
+            // height without needing a greedy GeometryReader)
+            ZStack(alignment: .top) {
+                statusDot
+                    .offset(y: 6)
+            }
+            .frame(width: 34)
 
             // Content
             VStack(alignment: .leading, spacing: 4) {
@@ -72,40 +77,50 @@ struct StopTimelineRow: View {
             }
         }
         .padding(.bottom, 20)
-    }
-
-    // MARK: - Timeline Column
-
-    private var timelineColumn: some View {
-        ZStack(alignment: .top) {
-            // Connecting line
+        // Connecting line drawn as a background on the full row.
+        // This inherits the row's resolved height, avoiding the
+        // unconstrained GeometryReader that caused layout deadlock.
+        .background(alignment: .topLeading) {
             if !isLast {
                 connectingLine
-                    .offset(y: 22)
+                    .padding(.top, 22)
             }
-
-            // Status dot
-            statusDot
-                .offset(y: 6)
         }
     }
 
+    // MARK: - Connecting Line
+    //
+    // Drawn as a .background on the row body so it inherits the full
+    // resolved row height. This replaces the previous bare GeometryReader
+    // which caused a layout deadlock inside ScrollView > VStack on
+    // NavigationStack push (blank screen until background/foreground).
+
     @ViewBuilder
     private var connectingLine: some View {
-        GeometryReader { geo in
-            if isTransitFromHere {
-                // Dashed orange line for in-transit
-                Path { path in
-                    path.move(to: CGPoint(x: 11.5, y: 0))
-                    path.addLine(to: CGPoint(x: 11.5, y: geo.size.height))
+        if isTransitFromHere {
+            // Dashed line for in-transit.
+            // The GeometryReader here is safe because it lives inside
+            // an .overlay on a Rectangle that already has its size
+            // resolved from the row background.
+            Rectangle()
+                .fill(.clear)
+                .frame(width: 24)
+                .overlay {
+                    GeometryReader { geo in
+                        Path { path in
+                            path.move(to: CGPoint(x: 11.5, y: 0))
+                            path.addLine(to: CGPoint(x: 11.5, y: geo.size.height))
+                        }
+                        .stroke(TourTokens.ember, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+                    }
                 }
-                .stroke(TourTokens.ember, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
-            } else {
-                Rectangle()
-                    .fill(stopState == .done || stopState == .playing || stopState == .arrived ? TourTokens.moss : TourTokens.faint)
-                    .frame(width: 1.5)
-                    .offset(x: 10.75)
-            }
+        } else {
+            // Solid line — no GeometryReader needed, just fill the
+            // available height from the background modifier.
+            Rectangle()
+                .fill(stopState == .done || stopState == .playing || stopState == .arrived ? TourTokens.moss : TourTokens.faint)
+                .frame(width: 1.5)
+                .offset(x: 10.75)
         }
     }
 

@@ -2,10 +2,10 @@ import Foundation
 
 // Local storage for walking tours.
 //
-// Directory structure:
+// Directory structure (v2 — stop/segment based):
 //   Documents/tours/{tourId}/tour.json
-//   Documents/tours/{tourId}/{waypointId}/content.m4a
-//   Documents/tours/{tourId}/{waypointId}/nav.m4a
+//   Documents/tours/{tourId}/{stopId}/content.m4a
+//   Documents/tours/{tourId}/{stopId}/nav.m4a
 //
 // Pre-authored tours live in the app bundle under WalkingTours/{tourId}/
 
@@ -42,9 +42,9 @@ final class TourStorageService {
         return dir
     }
 
-    private func waypointDirectory(tourId: String, waypointId: String) -> URL {
+    private func stopDirectory(tourId: String, stopId: String) -> URL {
         let dir = tourDirectory(tourId: tourId)
-            .appendingPathComponent(waypointId, isDirectory: true)
+            .appendingPathComponent(stopId, isDirectory: true)
         try? fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir
     }
@@ -82,57 +82,57 @@ final class TourStorageService {
 
     // MARK: - Audio file URLs (user-created)
 
-    func contentAudioURL(tourId: String, waypointId: String) -> URL {
-        waypointDirectory(tourId: tourId, waypointId: waypointId)
+    func contentAudioURL(tourId: String, stopId: String) -> URL {
+        stopDirectory(tourId: tourId, stopId: stopId)
             .appendingPathComponent("content.m4a")
     }
 
-    func navAudioURL(tourId: String, waypointId: String) -> URL {
-        waypointDirectory(tourId: tourId, waypointId: waypointId)
+    func navAudioURL(tourId: String, stopId: String) -> URL {
+        stopDirectory(tourId: tourId, stopId: stopId)
             .appendingPathComponent("nav.m4a")
     }
 
     // MARK: - Audio file URLs (authored tours — bundled in app)
 
-    func authoredContentAudioURL(tourId: String, waypointId: String) -> URL? {
+    func authoredContentAudioURL(tourId: String, stopId: String) -> URL? {
         // Try mp3 first (ElevenLabs output), then m4a
         Bundle.main.url(
             forResource: "content",
             withExtension: "mp3",
-            subdirectory: "WalkingTours/\(tourId)/\(waypointId)"
+            subdirectory: "WalkingTours/\(tourId)/\(stopId)"
         ) ?? Bundle.main.url(
             forResource: "content",
             withExtension: "m4a",
-            subdirectory: "WalkingTours/\(tourId)/\(waypointId)"
+            subdirectory: "WalkingTours/\(tourId)/\(stopId)"
         )
     }
 
-    func authoredNavAudioURL(tourId: String, waypointId: String) -> URL? {
+    func authoredNavAudioURL(tourId: String, stopId: String) -> URL? {
         Bundle.main.url(
             forResource: "nav",
             withExtension: "mp3",
-            subdirectory: "WalkingTours/\(tourId)/\(waypointId)"
+            subdirectory: "WalkingTours/\(tourId)/\(stopId)"
         ) ?? Bundle.main.url(
             forResource: "nav",
             withExtension: "m4a",
-            subdirectory: "WalkingTours/\(tourId)/\(waypointId)"
+            subdirectory: "WalkingTours/\(tourId)/\(stopId)"
         )
     }
 
-    /// Resolve audio URL — checks authored bundle first, then user documents.
-    func resolveContentAudioURL(tour: WalkingTour, waypoint: WalkingWaypoint) -> URL? {
+    /// Resolve content audio URL for a stop.
+    func resolveContentAudioURL(tour: WalkingTour, stop: TourStop) -> URL? {
         if tour.isAuthored {
-            return authoredContentAudioURL(tourId: tour.id, waypointId: waypoint.id)
+            return authoredContentAudioURL(tourId: tour.id, stopId: stop.id)
         }
-        let url = contentAudioURL(tourId: tour.id, waypointId: waypoint.id)
+        let url = contentAudioURL(tourId: tour.id, stopId: stop.id)
         return fileManager.fileExists(atPath: url.path) ? url : nil
     }
 
-    func resolveNavAudioURL(tour: WalkingTour, waypoint: WalkingWaypoint) -> URL? {
+    func resolveNavAudioURL(tour: WalkingTour, stop: TourStop) -> URL? {
         if tour.isAuthored {
-            return authoredNavAudioURL(tourId: tour.id, waypointId: waypoint.id)
+            return authoredNavAudioURL(tourId: tour.id, stopId: stop.id)
         }
-        let url = navAudioURL(tourId: tour.id, waypointId: waypoint.id)
+        let url = navAudioURL(tourId: tour.id, stopId: stop.id)
         return fileManager.fileExists(atPath: url.path) ? url : nil
     }
 }

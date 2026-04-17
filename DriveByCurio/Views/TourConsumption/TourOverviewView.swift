@@ -64,7 +64,8 @@ struct TourOverviewView: View {
             // Docked banner
             dockedBanner
         }
-        .navigationBarHidden(true)
+        .ignoresSafeArea(edges: .top)
+        .toolbarVisibility(.hidden, for: .navigationBar)
         .fullScreenCover(isPresented: $showSegmentPlayer) {
             if let segment = selectedSegment {
                 SegmentPlayerView(
@@ -242,7 +243,7 @@ struct TourOverviewView: View {
 
     private var stopsTimeline: some View {
         let sortedStops = tour.sortedStops
-        let paths = tour.synthesizedPaths
+        let paths = tour.paths
         let playerStopIndex = isPlayerActive ? player.currentWaypointIndex : -1
         // Determine in-transit: when player is in compass mode, we're transiting FROM current stop
         let transitFromIndex = isInTransit ? playerStopIndex : -1
@@ -260,7 +261,7 @@ struct TourOverviewView: View {
                     stop: stop,
                     index: index,
                     totalStops: sortedStops.count,
-                    segments: stop.synthesizedSegments,
+                    segments: stop.segments,
                     stopState: state,
                     isExpanded: expandedStopIndex == index,
                     activeSegmentIndex: 0,
@@ -316,7 +317,7 @@ struct TourOverviewView: View {
     @ViewBuilder
     private var dockedBanner: some View {
         let sortedStops = tour.sortedStops
-        let paths = tour.synthesizedPaths
+        let paths = tour.paths
 
         if isInTransit {
             let nextIndex = min(player.currentWaypointIndex + 1, sortedStops.count - 1)
@@ -328,7 +329,7 @@ struct TourOverviewView: View {
             DockedPlayerBanner(
                 tour: tour,
                 currentStopIndex: player.currentWaypointIndex,
-                navigateAddress: nextStop.displayAddress,
+                navigateAddress: nextStop.address,
                 navigateDistanceFeet: distanceFeet
             )
         } else {
@@ -342,7 +343,7 @@ struct TourOverviewView: View {
                 if isPlayerActive && player.isPlaying {
                     // Open segment player
                     let stop = sortedStops[stopIdx]
-                    let segments = stop.synthesizedSegments
+                    let segments = stop.segments
                     if !segments.isEmpty {
                         selectedSegment = segments[0]
                         selectedStopIndex = stopIdx

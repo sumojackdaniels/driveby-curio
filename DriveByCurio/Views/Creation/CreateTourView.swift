@@ -89,12 +89,15 @@ struct CreateTourView: View {
         let newTour = WalkingTour(
             id: UUID().uuidString,
             title: title,
-            creatorName: creatorName,
-            creatorIsLocal: creatorIsLocal,
+            author: TourAuthor(
+                name: creatorName,
+                role: creatorIsLocal ? "Local guide" : "Guide"
+            ),
             description: description,
             tags: Array(selectedTags),
             mode: mode,
-            waypoints: [],
+            stops: [],
+            paths: [],
             createdAt: Date(),
             updatedAt: Date(),
             isAuthored: false

@@ -23,12 +23,12 @@ struct DockedPlayerBanner: View {
     var navigateAddress: String? = nil
     var navigateDistanceFeet: Int? = nil
 
-    private var currentStop: WalkingWaypoint {
+    private var currentStop: TourStop {
         tour.sortedStops[currentStopIndex]
     }
 
     private var currentSegment: TourSegment? {
-        let segments = currentStop.synthesizedSegments
+        let segments = currentStop.segments
         guard currentSegmentIndex < segments.count else { return nil }
         return segments[currentSegmentIndex]
     }
@@ -101,7 +101,7 @@ struct DockedPlayerBanner: View {
                             }
                             .frame(width: 14, height: 14)
 
-                            Text("You are at \(currentStop.displayAddress)")
+                            Text("You are at \(currentStop.address)")
                                 .font(.caption2)
                                 .foregroundStyle(TourTokens.moss)
                                 .lineLimit(1)

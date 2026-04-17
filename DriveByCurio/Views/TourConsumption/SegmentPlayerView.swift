@@ -25,7 +25,7 @@ struct SegmentPlayerView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(WalkingTourPlayer.self) var player
 
-    private var stop: WalkingWaypoint {
+    private var stop: TourStop {
         tour.sortedStops[stopIndex]
     }
 

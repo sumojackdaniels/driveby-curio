@@ -147,7 +147,7 @@ struct WalkingTourBrowserView: View {
     }
 
     private var uniqueCreatorCount: Int {
-        Set(feedTours.map(\.creatorName)).count
+        Set(feedTours.map(\.author.name)).count
     }
 }
 
@@ -431,7 +431,7 @@ private struct TourFeedCard: View {
 
                 // Rating (placeholder)
                 HStack(spacing: 3) {
-                    Text("4.\(tour.waypoints.count)")
+                    Text("4.\(tour.stops.count)")
                         .fontWeight(.medium)
                     Text("⭐️")
                         .font(.caption)

@@ -164,7 +164,7 @@ private struct NowPlayingBanner: View {
                     }
                 }
                 Spacer()
-                Text("Stop \(player.currentWaypointIndex + 1) of \(tour.waypoints.count)")
+                Text("Stop \(player.currentWaypointIndex + 1) of \(tour.stops.count)")
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.white.opacity(0.85))
             }

@@ -4,7 +4,7 @@ import SwiftUI
 // audio (up to 5 min) and nav instruction audio (up to 15 sec).
 
 struct WaypointEditorView: View {
-    @Binding var waypoint: WalkingWaypoint
+    @Binding var waypoint: TourStop
     let tourId: String
     let onDelete: () -> Void
 
@@ -49,7 +49,7 @@ struct WaypointEditorView: View {
                 }
 
                 Section("Story Recording (up to 5 min)") {
-                    if waypoint.contentAudioFile != nil {
+                    if hasContentAudio {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(.green)
@@ -124,21 +124,37 @@ struct WaypointEditorView: View {
                 RecordingView(
                     title: "Record Story",
                     maxDuration: 300,
-                    targetURL: storage.contentAudioURL(tourId: tourId, waypointId: waypoint.id)
+                    targetURL: storage.contentAudioURL(tourId: tourId, stopId: waypoint.id)
                 ) { url in
-                    waypoint.contentAudioFile = "content.m4a"
+                    // Create or update the narration segment
+                    if let idx = waypoint.segments.firstIndex(where: { $0.kind == .narration }) {
+                        waypoint.segments[idx].audioFile = "content.m4a"
+                    } else {
+                        waypoint.segments.append(TourSegment(
+                            id: "\(waypoint.id)-narration",
+                            kind: .narration,
+                            title: waypoint.title,
+                            description: "",
+                            durationSeconds: 180,
+                            audioFile: "content.m4a"
+                        ))
+                    }
                 }
             }
             .sheet(isPresented: $showNavRecorder) {
                 RecordingView(
                     title: "Record Direction",
                     maxDuration: 15,
-                    targetURL: storage.navAudioURL(tourId: tourId, waypointId: waypoint.id)
+                    targetURL: storage.navAudioURL(tourId: tourId, stopId: waypoint.id)
                 ) { url in
                     waypoint.navAudioFile = "nav.m4a"
                 }
             }
         }
+    }
+
+    private var hasContentAudio: Bool {
+        waypoint.segments.contains { $0.audioFile != nil }
     }
 
     private var radiusDescription: String {

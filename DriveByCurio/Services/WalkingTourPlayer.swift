@@ -35,7 +35,7 @@ final class WalkingTourPlayer: NSObject {
     // MARK: - Observable state
 
     private(set) var activeTour: WalkingTour?
-    private(set) var currentWaypointIndex: Int = 0
+    private(set) var currentStopIndex: Int = 0
     private(set) var isPlaying: Bool = false
     private(set) var hasStarted: Bool = false
     private(set) var playbackMode: WalkingPlaybackMode = .listening
@@ -50,22 +50,27 @@ final class WalkingTourPlayer: NSObject {
     private(set) var audioDuration: TimeInterval = 0
     private(set) var audioCurrentTime: TimeInterval = 0
 
-    var currentWaypoint: WalkingWaypoint? {
+    /// Backward-compatible alias used by views that still reference currentWaypointIndex.
+    var currentWaypointIndex: Int { currentStopIndex }
+
+    var currentStop: TourStop? {
         guard let tour = activeTour else { return nil }
-        guard currentWaypointIndex < tour.waypoints.count else { return nil }
-        return tour.waypoints[currentWaypointIndex]
+        let sorted = tour.sortedStops
+        guard currentStopIndex < sorted.count else { return nil }
+        return sorted[currentStopIndex]
     }
 
-    var nextWaypoint: WalkingWaypoint? {
+    var nextStop: TourStop? {
         guard let tour = activeTour else { return nil }
-        let next = currentWaypointIndex + 1
-        guard next < tour.waypoints.count else { return nil }
-        return tour.waypoints[next]
+        let sorted = tour.sortedStops
+        let next = currentStopIndex + 1
+        guard next < sorted.count else { return nil }
+        return sorted[next]
     }
 
     var isLastStop: Bool {
         guard let tour = activeTour else { return true }
-        return currentWaypointIndex >= tour.waypoints.count - 1
+        return currentStopIndex >= tour.sortedStops.count - 1
     }
 
     // MARK: - Dependencies
@@ -92,7 +97,7 @@ final class WalkingTourPlayer: NSObject {
 
     func startTour(_ tour: WalkingTour) {
         activeTour = tour
-        currentWaypointIndex = 0
+        currentStopIndex = 0
         hasStarted = true
         playbackMode = .listening
 
@@ -108,7 +113,7 @@ final class WalkingTourPlayer: NSObject {
         player.replaceCurrentItem(with: nil)
         removePlayerEndObserver()
         activeTour = nil
-        currentWaypointIndex = 0
+        currentStopIndex = 0
         isPlaying = false
         hasStarted = false
         playbackMode = .listening
@@ -138,12 +143,12 @@ final class WalkingTourPlayer: NSObject {
     // MARK: - Playback state machine
 
     private func playContentAudio() {
-        guard let tour = activeTour, let waypoint = currentWaypoint else { return }
+        guard let tour = activeTour, let stop = currentStop else { return }
 
-        if let url = storage.resolveContentAudioURL(tour: tour, waypoint: waypoint) {
+        if let url = storage.resolveContentAudioURL(tour: tour, stop: stop) {
             playbackMode = .listening
             playAudio(url: url)
-            updateNowPlayingInfo(tour: tour, waypoint: waypoint)
+            updateNowPlayingInfo(tour: tour, stop: stop)
         } else {
             // No content audio — skip to nav or compass
             onContentFinished()
@@ -151,7 +156,7 @@ final class WalkingTourPlayer: NSObject {
     }
 
     private func onContentFinished() {
-        guard let tour = activeTour, let waypoint = currentWaypoint else { return }
+        guard let tour = activeTour, let stop = currentStop else { return }
 
         if isLastStop {
             playbackMode = .finished
@@ -161,7 +166,7 @@ final class WalkingTourPlayer: NSObject {
         }
 
         // Try to play nav instruction
-        if let navURL = storage.resolveNavAudioURL(tour: tour, waypoint: waypoint) {
+        if let navURL = storage.resolveNavAudioURL(tour: tour, stop: stop) {
             playbackMode = .navInstruction
             playAudio(url: navURL)
         } else {
@@ -182,12 +187,12 @@ final class WalkingTourPlayer: NSObject {
 
     private func advanceToNextStop() {
         guard let tour = activeTour else { return }
-        let next = currentWaypointIndex + 1
-        guard next < tour.waypoints.count else {
+        let next = currentStopIndex + 1
+        guard next < tour.sortedStops.count else {
             playbackMode = .finished
             return
         }
-        currentWaypointIndex = next
+        currentStopIndex = next
         walkingRoute = nil
         playContentAudio()
     }
@@ -274,28 +279,29 @@ final class WalkingTourPlayer: NSObject {
 
     private func onLocationUpdate(_ location: CLLocation) {
         guard let tour = activeTour else { return }
-        let nextIndex = currentWaypointIndex + 1
-        guard nextIndex < tour.waypoints.count else { return }
+        let sorted = tour.sortedStops
+        let nextIndex = currentStopIndex + 1
+        guard nextIndex < sorted.count else { return }
 
-        let nextWp = tour.waypoints[nextIndex]
-        let distance = location.distance(from: nextWp.clLocation)
+        let nextSt = sorted[nextIndex]
+        let distance = location.distance(from: nextSt.clLocation)
         distanceToNextStop = distance
 
         // Calculate bearing
         bearingToNextStop = Self.bearing(
             from: location.coordinate,
-            to: nextWp.coordinate
+            to: nextSt.coordinate
         )
 
         // Debug logging
         let tick = Int(Date().timeIntervalSince1970) % 10
         if tick == 0 {
-            print("📍 Walking: \(String(format: "%.5f", location.coordinate.latitude)), \(String(format: "%.5f", location.coordinate.longitude)) → next [\(nextIndex)] \"\(nextWp.title)\" \(Int(distance))m (trigger: \(Int(nextWp.triggerRadiusMeters))m) mode: \(playbackMode)")
+            print("📍 Walking: \(String(format: "%.5f", location.coordinate.latitude)), \(String(format: "%.5f", location.coordinate.longitude)) → next [\(nextIndex)] \"\(nextSt.title)\" \(Int(distance))m (trigger: \(Int(nextSt.triggerRadiusMeters))m) mode: \(playbackMode)")
         }
 
         // Only auto-advance in compass mode (not while listening or playing nav)
-        if playbackMode == .compass && distance <= nextWp.triggerRadiusMeters {
-            print("🎯 Walking TRIGGERED: entering \"\(nextWp.title)\" at \(Int(distance))m")
+        if playbackMode == .compass && distance <= nextSt.triggerRadiusMeters {
+            print("🎯 Walking TRIGGERED: entering \"\(nextSt.title)\" at \(Int(distance))m")
             advanceToNextStop()
         }
     }
@@ -304,7 +310,7 @@ final class WalkingTourPlayer: NSObject {
 
     private func fetchWalkingRoute() {
         guard let current = locationService.currentLocation?.coordinate,
-              let next = nextWaypoint?.coordinate else { return }
+              let next = nextStop?.coordinate else { return }
 
         let request = MKDirections.Request()
         request.source = MKMapItem(placemark: MKPlacemark(coordinate: current))
@@ -322,11 +328,11 @@ final class WalkingTourPlayer: NSObject {
         }
     }
 
-    /// Open Apple Maps with walking directions to the next waypoint.
+    /// Open Apple Maps with walking directions to the next stop.
     func openMapsToNextStop() {
-        guard let wp = nextWaypoint else { return }
-        let destination = MKMapItem(placemark: MKPlacemark(coordinate: wp.coordinate))
-        destination.name = wp.title
+        guard let stop = nextStop else { return }
+        let destination = MKMapItem(placemark: MKPlacemark(coordinate: stop.coordinate))
+        destination.name = stop.title
         destination.openInMaps(launchOptions: [
             MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking,
         ])
@@ -372,10 +378,10 @@ final class WalkingTourPlayer: NSObject {
 
     // MARK: - Now Playing info
 
-    private func updateNowPlayingInfo(tour: WalkingTour, waypoint: WalkingWaypoint) {
+    private func updateNowPlayingInfo(tour: WalkingTour, stop: TourStop) {
         var info: [String: Any] = [:]
-        info[MPMediaItemPropertyTitle] = waypoint.title
-        info[MPMediaItemPropertyArtist] = tour.creatorName
+        info[MPMediaItemPropertyTitle] = stop.title
+        info[MPMediaItemPropertyArtist] = tour.author.name
         info[MPMediaItemPropertyAlbumTitle] = tour.title
         info[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
         info[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
@@ -399,11 +405,10 @@ final class WalkingTourPlayer: NSObject {
         let size = CGSize(width: 600, height: 600)
         let renderer = UIGraphicsImageRenderer(size: size)
         return renderer.image { ctx in
-            // Different colors for different modes
             let color: UIColor = switch mode {
-            case .walking: UIColor(red: 0.13, green: 0.36, blue: 0.28, alpha: 1.0) // forest green
-            case .biking: UIColor(red: 0.20, green: 0.30, blue: 0.42, alpha: 1.0) // steel blue
-            case .driving: UIColor(red: 0.10, green: 0.18, blue: 0.32, alpha: 1.0) // indigo
+            case .walking: UIColor(red: 0.13, green: 0.36, blue: 0.28, alpha: 1.0)
+            case .biking: UIColor(red: 0.20, green: 0.30, blue: 0.42, alpha: 1.0)
+            case .driving: UIColor(red: 0.10, green: 0.18, blue: 0.32, alpha: 1.0)
             }
             color.setFill()
             ctx.fill(CGRect(origin: .zero, size: size))
