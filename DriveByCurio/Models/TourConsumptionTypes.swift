@@ -121,7 +121,7 @@ extension WalkingTour {
     var author: TourAuthor {
         TourAuthor(
             name: creatorName,
-            role: creatorIsLocal ? "Local resident" : "Guide"
+            role: creatorIsLocal ? "Local guide" : "Guide"
         )
     }
 
@@ -170,8 +170,16 @@ extension WalkingTour {
         sortedStops.first?.displayAddress ?? ""
     }
 
-    /// A representative quote from the tour (first line of the description).
+    /// A representative quote from the tour (first sentence of the description).
     var coverQuote: String {
-        description
+        // Extract first sentence — find the first period followed by a space or end-of-string
+        if let range = description.range(of: ".", options: .literal) {
+            let firstSentence = String(description[description.startIndex..<range.upperBound])
+            // Only truncate if description has more than one sentence
+            if firstSentence.count < description.count {
+                return String(firstSentence.dropLast()) // drop trailing period for quote styling
+            }
+        }
+        return description
     }
 }

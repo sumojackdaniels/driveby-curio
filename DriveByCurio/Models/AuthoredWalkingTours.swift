@@ -15,7 +15,7 @@ enum AuthoredWalkingTours {
     static let huntingtonBradmoor = WalkingTour(
         id: "huntington-bradmoor",
         title: "Postwar Dreams on Quiet Streets",
-        creatorName: "DriveByCurio",
+        creatorName: "Aly Mahmoud",
         creatorIsLocal: true,
         description: "A neighborhood history walk through two mid-century Bethesda subdivisions built on the promise of the American Dream.",
         tags: ["history", "neighborhood", "architecture"],
@@ -156,7 +156,7 @@ enum AuthoredWalkingTours {
     static let mccrillis = WalkingTour(
         id: "mccrillis-gardens",
         title: "A Garden for All Seasons",
-        creatorName: "DriveByCurio",
+        creatorName: "Aly Mahmoud",
         creatorIsLocal: true,
         description: "A botanical walk through one of Bethesda's hidden gems — a five-acre shade garden designed to be beautiful twelve months a year.",
         tags: ["botanical", "garden", "nature"],
@@ -301,7 +301,7 @@ enum AuthoredWalkingTours {
     static let rockCreekTrails = WalkingTour(
         id: "rock-creek-trails",
         title: "Where the City Disappears",
-        creatorName: "DriveByCurio",
+        creatorName: "Aly Mahmoud",
         creatorIsLocal: true,
         description: "A walk along Rock Creek from Boundary Bridge into a forest that makes you forget you're surrounded by a million people. New Deal bridges, fall-zone geology, and an urban wilderness.",
         tags: ["nature", "history", "neighborhood"],
