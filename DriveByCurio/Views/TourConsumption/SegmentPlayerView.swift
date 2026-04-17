@@ -113,7 +113,6 @@ struct SegmentPlayerView: View {
                 .frame(width: 34, height: 34)
         }
         .padding(.horizontal, 16)
-        .padding(.top, 50)
     }
 
     // MARK: - Segment Header

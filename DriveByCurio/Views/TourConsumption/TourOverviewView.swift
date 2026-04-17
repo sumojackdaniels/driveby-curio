@@ -60,13 +60,12 @@ struct TourOverviewView: View {
                         .frame(height: 120)
                 }
             }
-            .ignoresSafeArea(edges: .top)
 
             // Docked banner
             dockedBanner
         }
-        .navigationBarBackButtonHidden(true)
-        .toolbar(.hidden, for: .navigationBar)
+        .ignoresSafeArea(edges: .top)
+        .toolbarVisibility(.hidden, for: .navigationBar)
         .fullScreenCover(isPresented: $showSegmentPlayer) {
             if let segment = selectedSegment {
                 SegmentPlayerView(
@@ -119,15 +118,14 @@ struct TourOverviewView: View {
             .padding(.bottom, 18)
 
             // Back button
-            VStack {
+            GeometryReader { geo in
                 HStack {
                     backButton
                     Spacer()
                 }
-                Spacer()
+                .padding(.top, geo.safeAreaInsets.top + 4)
+                .padding(.leading, 12)
             }
-            .padding(.top, 52)
-            .padding(.leading, 12)
         }
         .frame(height: TourTokens.heroHeight)
     }
