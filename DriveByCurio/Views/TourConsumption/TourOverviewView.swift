@@ -60,11 +60,13 @@ struct TourOverviewView: View {
                         .frame(height: 120)
                 }
             }
-
             // Docked banner
             dockedBanner
         }
         .ignoresSafeArea(edges: .top)
+        // Workaround: 0.5pt padding forces layout recalculation on NavigationStack push,
+        // preventing the blank-screen bug with ignoresSafeArea on iOS 18+.
+        .padding(.vertical, 0.5)
         .toolbarVisibility(.hidden, for: .navigationBar)
         .fullScreenCover(isPresented: $showSegmentPlayer) {
             if let segment = selectedSegment {
@@ -82,7 +84,7 @@ struct TourOverviewView: View {
 
     private var heroSection: some View {
         ZStack(alignment: .bottom) {
-            // Photo
+            // Photo — extend behind status bar
             PhotoPlaceholder(
                 label: "\(tour.title) cover",
                 height: TourTokens.heroHeight,
@@ -117,14 +119,16 @@ struct TourOverviewView: View {
             .padding(.horizontal, TourTokens.horizontalPadding)
             .padding(.bottom, 18)
 
-            // Back button
-            GeometryReader { geo in
+            // Back button — pinned to top-left
+            VStack {
                 HStack {
                     backButton
                     Spacer()
                 }
-                .padding(.top, geo.safeAreaInsets.top + 4)
+                .padding(.top, 54)
                 .padding(.leading, 12)
+
+                Spacer()
             }
         }
         .frame(height: TourTokens.heroHeight)
