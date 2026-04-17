@@ -368,15 +368,6 @@ private struct TourFeedCard: View {
             // Map placeholder
             ZStack {
                 Color(.systemGray6)
-                // Diagonal hatch
-                Canvas { context, size in
-                    for i in stride(from: 0, to: size.width + size.height, by: 10) {
-                        var path = Path()
-                        path.move(to: CGPoint(x: i, y: 0))
-                        path.addLine(to: CGPoint(x: i - size.height, y: size.height))
-                        context.stroke(path, with: .color(.gray.opacity(0.12)), lineWidth: 0.6)
-                    }
-                }
                 Text("[map]")
                     .font(.system(size: 10, design: .monospaced))
                     .fontWeight(.semibold)

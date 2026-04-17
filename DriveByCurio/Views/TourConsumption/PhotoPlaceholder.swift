@@ -12,22 +12,8 @@ struct PhotoPlaceholder: View {
 
     var body: some View {
         ZStack {
-            // Striped background
-            Canvas { context, size in
-                let stripeWidth: CGFloat = 8
-                let totalStripes = Int(ceil((size.width + size.height) / stripeWidth))
-                for i in 0..<totalStripes {
-                    let x = CGFloat(i) * stripeWidth * 2
-                    var path = Path()
-                    path.move(to: CGPoint(x: x, y: 0))
-                    path.addLine(to: CGPoint(x: x - size.height, y: size.height))
-                    path.addLine(to: CGPoint(x: x - size.height + stripeWidth, y: size.height))
-                    path.addLine(to: CGPoint(x: x + stripeWidth, y: 0))
-                    path.closeSubpath()
-                    context.fill(path, with: .color(Color(.systemGray5)))
-                }
-            }
-            .background(Color(.systemGray6))
+            // Solid placeholder background (avoids Canvas/Metal rendering stalls)
+            Color(.systemGray6)
 
             // Label
             Text("[\(label)]")

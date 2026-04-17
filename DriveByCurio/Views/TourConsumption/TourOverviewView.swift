@@ -29,7 +29,6 @@ struct TourOverviewView: View {
     @State private var showSegmentPlayer = false
     @State private var selectedSegment: TourSegment?
     @State private var selectedStopIndex: Int = 0
-    @State private var hasAppeared = false
 
     // Derived state
     private var isPlayerActive: Bool { player.activeTour?.id == tour.id }
@@ -67,16 +66,6 @@ struct TourOverviewView: View {
             dockedBanner
         }
         .toolbarVisibility(.hidden, for: .navigationBar)
-        .opacity(hasAppeared ? 1 : 0.99)
-        .onAppear {
-            // Force a re-render to work around blank-screen bug
-            // with ignoresSafeArea on NavigationStack push (iOS 18+).
-            // The opacity change triggers a layout pass that resolves
-            // the stalled safe area calculation.
-            DispatchQueue.main.async {
-                hasAppeared = true
-            }
-        }
         .fullScreenCover(isPresented: $showSegmentPlayer) {
             if let segment = selectedSegment {
                 SegmentPlayerView(
