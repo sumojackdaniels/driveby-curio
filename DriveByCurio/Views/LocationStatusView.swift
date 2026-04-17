@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreLocation
+import UIKit
 import CoreSwift
 
 struct LocationStatusView: View {
@@ -23,9 +24,18 @@ struct LocationStatusView: View {
 
             if locationService.authorizationStatus == .notDetermined {
                 Button("Enable") {
-                    locationService.requestAlwaysAuthorization()
+                    locationService.requestWhenInUseAuthorization()
                 }
                 .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+            } else if locationService.authorizationStatus == .denied {
+                Button("Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
                 .controlSize(.small)
             } else if locationService.authorizationStatus == .authorizedWhenInUse {
                 Button("Always On") {

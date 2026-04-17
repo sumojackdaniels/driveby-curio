@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<gpx version="1.1" creator="DriveByCurio">
+  <!-- McCrillis Gardens botanical walking tour — 6 stops -->
+  <!-- Short intervals for a compact garden walk -->
+  <wpt lat="39.00771" lon="-77.13975"><time>2026-04-16T10:00:00Z</time><name>Stop 1: Garden Entrance</name></wpt>
+  <wpt lat="39.00780" lon="-77.13990"><time>2026-04-16T10:00:20Z</time></wpt>
+  <wpt lat="39.00790" lon="-77.14010"><time>2026-04-16T10:00:40Z</time><name>Stop 2: Azalea Collection</name></wpt>
+  <wpt lat="39.00785" lon="-77.13950"><time>2026-04-16T10:01:00Z</time></wpt>
+  <wpt lat="39.00780" lon="-77.13900"><time>2026-04-16T10:01:20Z</time></wpt>
+  <wpt lat="39.00780" lon="-77.13860"><time>2026-04-16T10:01:40Z</time><name>Stop 3: Specimen Trees</name></wpt>
+  <wpt lat="39.00810" lon="-77.13920"><time>2026-04-16T10:02:00Z</time></wpt>
+  <wpt lat="39.00840" lon="-77.14000"><time>2026-04-16T10:02:20Z</time></wpt>
+  <wpt lat="39.00860" lon="-77.14080"><time>2026-04-16T10:02:40Z</time></wpt>
+  <wpt lat="39.00880" lon="-77.14160"><time>2026-04-16T10:03:00Z</time><name>Stop 4: Shade Perennials</name></wpt>
+  <wpt lat="39.00830" lon="-77.14130"><time>2026-04-16T10:03:20Z</time></wpt>
+  <wpt lat="39.00770" lon="-77.14100"><time>2026-04-16T10:03:40Z</time></wpt>
+  <wpt lat="39.00730" lon="-77.14070"><time>2026-04-16T10:04:00Z</time></wpt>
+  <wpt lat="39.00700" lon="-77.14050"><time>2026-04-16T10:04:20Z</time><name>Stop 5: Stream Garden</name></wpt>
+  <wpt lat="39.00720" lon="-77.14000"><time>2026-04-16T10:04:40Z</time></wpt>
+  <wpt lat="39.00740" lon="-77.13950"><time>2026-04-16T10:05:00Z</time></wpt>
+  <wpt lat="39.00750" lon="-77.13900"><time>2026-04-16T10:05:20Z</time><name>Stop 6: Seasonal Design</name></wpt>
+</gpx>

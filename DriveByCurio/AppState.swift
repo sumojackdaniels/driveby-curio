@@ -24,10 +24,14 @@ final class AppState {
     // Shared
     let locationService = LocationService()
 
-    // Tours
+    // Driving tours (CarPlay)
     let tourService: TourService
     let tourCatalogStore: TourCatalogStore
     let tourPlayer: TourPlayer
+
+    // Walking tours (iPhone)
+    let walkingTourStore: WalkingTourStore
+    let walkingTourPlayer: WalkingTourPlayer
 
     // Legacy (live mode / MVP — kept compiling, unused on CarPlay)
     let topicsStore = TopicsStore()
@@ -49,5 +53,9 @@ final class AppState {
         self.tourCatalogStore = TourCatalogStore(service: tourService)
         self.tourPlayer = TourPlayer(tourService: tourService, locationService: locationService)
         self.poiService = POIService(baseURL: baseURL)
+
+        // Walking tours
+        self.walkingTourStore = WalkingTourStore()
+        self.walkingTourPlayer = WalkingTourPlayer(locationService: locationService)
     }
 }
