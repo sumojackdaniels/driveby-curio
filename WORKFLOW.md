@@ -21,12 +21,6 @@
    - derivedDataPath: /tmp/curio-build
 3. `build_run_sim` — builds, boots simulator, installs, launches
 
-### CarPlay Simulator
-
-To test CarPlay: Simulator → I/O → External Displays → CarPlay
-
-Enable extra options: `defaults write com.apple.iphonesimulator CarPlayExtraOptions -bool YES`
-
 ## Design Iteration (SwiftUI Previews)
 
 Shared design-iteration workflow. Full docs are in the `infra` repo: [`docs/design-workflow/`](https://github.com/sumojackdaniels/infra/tree/main/docs/design-workflow). Clone `infra` next to this repo if you don't have it.

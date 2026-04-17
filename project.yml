@@ -35,7 +35,6 @@ targets:
     dependencies:
       - package: core-swift
         product: CoreSwift
-      - sdk: CarPlay.framework
       - sdk: MapKit.framework
       - sdk: AVFoundation.framework
     settings:
@@ -54,30 +53,13 @@ targets:
               - UISceneClassName: UIWindowScene
                 UISceneConfigurationName: PhoneSceneConfiguration
                 UISceneDelegateClassName: "$(PRODUCT_MODULE_NAME).PhoneSceneDelegate"
-            CPTemplateApplicationSceneSessionRoleApplication:
-              - UISceneClassName: CPTemplateApplicationScene
-                UISceneConfigurationName: CarPlaySceneConfiguration
-                UISceneDelegateClassName: "$(PRODUCT_MODULE_NAME).CarPlaySceneDelegate"
         UIBackgroundModes:
           - location
           - audio
-        NSLocationWhenInUseUsageDescription: "DriveByCurio uses your location to play audio stories about the places you're passing on a guided tour."
-        NSLocationAlwaysAndWhenInUseUsageDescription: "DriveByCurio plays audio stories about places along your tour route even when the app is in the background — for example, while Apple Maps is showing directions on your CarPlay screen."
-        NSMicrophoneUsageDescription: "DriveByCurio uses the microphone so you can record audio narration for tours you create."
+        NSLocationWhenInUseUsageDescription: "DriveByCurio uses your location to play audio stories at the right spot as you walk a tour."
+        NSLocationAlwaysAndWhenInUseUsageDescription: "DriveByCurio plays audio stories about places along your walking tour even when the app is in the background or your screen is off."
+        NSMicrophoneUsageDescription: "DriveByCurio uses the microphone so you can record audio narration for walking tours you create."
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UIRequiresFullScreen: true
-        UIApplicationSupportsMultipleScenes: true
-
-  DriveByCurioTests:
-    type: bundle.unit-test
-    platform: iOS
-    sources:
-      - path: DriveByCurioTests
-    dependencies:
-      - target: DriveByCurio
-    settings:
-      base:
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/DriveByCurio.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DriveByCurio"
-        BUNDLE_LOADER: "$(TEST_HOST)"
-        GENERATE_INFOPLIST_FILE: true
+        UIApplicationSupportsMultipleScenes: false
