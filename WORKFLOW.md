@@ -23,12 +23,12 @@
 
 ## Design Iteration (SwiftUI Previews)
 
-Shared design-iteration workflow. Full docs are in the `infra` repo: [`docs/design-workflow/`](https://github.com/sumojackdaniels/infra/tree/main/docs/design-workflow). Clone `infra` next to this repo if you don't have it.
+Shared design-iteration workflow. Full docs live in the `core-swift` repo: [`docs/design-workflow/`](https://github.com/sumojackdaniels/core-swift/tree/main/docs/design-workflow). Since core-swift is already resolved as an SPM dependency, these docs are also available locally in Xcode's derived packages (or clone core-swift next to this repo if you want to edit them).
 
 Read in this order:
-1. [`README.md`](https://github.com/sumojackdaniels/infra/blob/main/docs/design-workflow/README.md) — three-tier workflow overview
-2. [`previews-guide.md`](https://github.com/sumojackdaniels/infra/blob/main/docs/design-workflow/previews-guide.md) — **conventions every new screen and component must follow**
-3. [`troubleshooting.md`](https://github.com/sumojackdaniels/infra/blob/main/docs/design-workflow/troubleshooting.md) — when the canvas spins, crashes, or reports phantom errors
+1. [`README.md`](https://github.com/sumojackdaniels/core-swift/blob/main/docs/design-workflow/README.md) — three-tier workflow overview
+2. [`previews-guide.md`](https://github.com/sumojackdaniels/core-swift/blob/main/docs/design-workflow/previews-guide.md) — **conventions every new screen and component must follow**
+3. [`troubleshooting.md`](https://github.com/sumojackdaniels/core-swift/blob/main/docs/design-workflow/troubleshooting.md) — when the canvas spins, crashes, or reports phantom errors
 
 Quick rules (full detail in `previews-guide.md`):
 - **Every new screen** ships `#Preview`, `#Preview("States")`, `#Preview("Dark")`, `#Preview("A11y XL")` at minimum.
