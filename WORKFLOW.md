@@ -27,6 +27,21 @@ To test CarPlay: Simulator → I/O → External Displays → CarPlay
 
 Enable extra options: `defaults write com.apple.iphonesimulator CarPlayExtraOptions -bool YES`
 
+## Design Iteration (SwiftUI Previews)
+
+Shared design-iteration workflow. Full docs are in the `infra` repo: [`docs/design-workflow/`](https://github.com/sumojackdaniels/infra/tree/main/docs/design-workflow). Clone `infra` next to this repo if you don't have it.
+
+Read in this order:
+1. [`README.md`](https://github.com/sumojackdaniels/infra/blob/main/docs/design-workflow/README.md) — three-tier workflow overview
+2. [`previews-guide.md`](https://github.com/sumojackdaniels/infra/blob/main/docs/design-workflow/previews-guide.md) — **conventions every new screen and component must follow**
+3. [`troubleshooting.md`](https://github.com/sumojackdaniels/infra/blob/main/docs/design-workflow/troubleshooting.md) — when the canvas spins, crashes, or reports phantom errors
+
+Quick rules (full detail in `previews-guide.md`):
+- **Every new screen** ships `#Preview`, `#Preview("States")`, `#Preview("Dark")`, `#Preview("A11y XL")` at minimum.
+- **Split env-coupled views** into a container (reads `@Environment`) + a presentational `<Name>Content` struct that takes plain values. Preview the `Content`.
+- **Component vs screen:** reusable components have variant previews in their own file; screens have state previews; never duplicate.
+- **Don't reference singletons** (`Service.shared`, `UserDefaults`, `UUID()`, `Date()`) from preview closures — causes non-determinism.
+
 ## TDD Workflow
 
 1. Write test for the component
