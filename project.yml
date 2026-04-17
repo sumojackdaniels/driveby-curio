@@ -47,12 +47,6 @@ targets:
     info:
       path: DriveByCurio/Info.plist
       properties:
-        UIApplicationSceneManifest:
-          UISceneConfigurations:
-            UIWindowSceneSessionRoleApplication:
-              - UISceneClassName: UIWindowScene
-                UISceneConfigurationName: PhoneSceneConfiguration
-                UISceneDelegateClassName: "$(PRODUCT_MODULE_NAME).PhoneSceneDelegate"
         UIBackgroundModes:
           - location
           - audio
@@ -62,4 +56,3 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UIRequiresFullScreen: true
-        UIApplicationSupportsMultipleScenes: false

@@ -26,25 +26,6 @@
 	<string>DriveByCurio uses your location to play audio stories at the right spot as you walk a tour.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>DriveByCurio uses the microphone so you can record audio narration for walking tours you create.</string>
-	<key>UIApplicationSceneManifest</key>
-	<dict>
-		<key>UISceneConfigurations</key>
-		<dict>
-			<key>UIWindowSceneSessionRoleApplication</key>
-			<array>
-				<dict>
-					<key>UISceneClassName</key>
-					<string>UIWindowScene</string>
-					<key>UISceneConfigurationName</key>
-					<string>PhoneSceneConfiguration</string>
-					<key>UISceneDelegateClassName</key>
-					<string>$(PRODUCT_MODULE_NAME).PhoneSceneDelegate</string>
-				</dict>
-			</array>
-		</dict>
-	</dict>
-	<key>UIApplicationSupportsMultipleScenes</key>
-	<false/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
