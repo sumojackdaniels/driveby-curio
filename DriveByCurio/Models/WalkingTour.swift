@@ -202,15 +202,10 @@ struct WalkingTour: Identifiable, Codable, Equatable, Hashable {
         sortedStops.first?.address ?? ""
     }
 
-    /// A representative quote from the tour (first sentence of the description).
+    /// A representative quote from the tour (first sentence of the description, without the trailing period).
     var coverQuote: String {
-        if let range = description.range(of: ".", options: .literal) {
-            let firstSentence = String(description[description.startIndex..<range.upperBound])
-            if firstSentence.count < description.count {
-                return String(firstSentence.dropLast())
-            }
-        }
-        return description
+        guard let range = description.range(of: ".") else { return description }
+        return String(description[description.startIndex..<range.lowerBound])
     }
 
     static func == (lhs: WalkingTour, rhs: WalkingTour) -> Bool {
@@ -219,6 +214,22 @@ struct WalkingTour: Identifiable, Codable, Equatable, Hashable {
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+    }
+
+    // MARK: - Path computation
+
+    /// Compute walking/biking paths between consecutive stops from GPS coordinates.
+    /// Walking: 3 mph ≈ 264 ft/min. Biking: 10 mph ≈ 880 ft/min.
+    static func computePaths(from stops: [TourStop]) -> [TourPath] {
+        let sorted = stops.sorted { $0.order < $1.order }
+        guard sorted.count >= 2 else { return [] }
+        return zip(sorted, sorted.dropFirst()).map { from, to in
+            let meters = from.clLocation.distance(from: to.clLocation)
+            let feet = Int(meters * 3.28084)
+            let walkMin = max(1, Int(ceil(Double(feet) / 264.0)))
+            let bikeMin = max(1, Int(ceil(Double(feet) / 880.0)))
+            return TourPath(walkMinutes: walkMin, bikeMinutes: bikeMin, distanceFeet: feet)
+        }
     }
 
     // MARK: - Codable (with legacy migration)
@@ -313,19 +324,7 @@ struct WalkingTour: Identifiable, Codable, Equatable, Hashable {
                 )
             }
 
-            // Compute paths from GPS coordinates
-            let sorted = stops.sorted { $0.order < $1.order }
-            if sorted.count >= 2 {
-                paths = zip(sorted, sorted.dropFirst()).map { from, to in
-                    let meters = from.clLocation.distance(from: to.clLocation)
-                    let feet = Int(meters * 3.28084)
-                    let walkMin = max(1, Int(ceil(Double(feet) / 264.0)))
-                    let bikeMin = max(1, Int(ceil(Double(feet) / 880.0)))
-                    return TourPath(walkMinutes: walkMin, bikeMinutes: bikeMin, distanceFeet: feet)
-                }
-            } else {
-                paths = []
-            }
+            paths = Self.computePaths(from: stops)
         }
     }
 

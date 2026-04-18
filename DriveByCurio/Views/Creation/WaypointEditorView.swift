@@ -2,9 +2,6 @@ import SwiftUI
 
 // Per-stop editor — set title, trigger radius, record content
 // audio (up to 5 min) and nav instruction audio (up to 15 sec).
-//
-// This file keeps the old name WaypointEditorView as a typealias
-// but the primary type is now StopEditorView.
 
 struct StopEditorView: View {
     @Binding var stop: TourStop
@@ -160,6 +157,3 @@ struct StopEditorView: View {
         return "Wide — starts well before arrival"
     }
 }
-
-// Keep old name as typealias
-typealias WaypointEditorView = StopEditorView

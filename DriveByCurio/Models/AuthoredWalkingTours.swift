@@ -13,17 +13,8 @@ enum AuthoredWalkingTours {
 
     // MARK: - Helpers
 
-    /// Compute paths from an ordered array of stops using GPS coordinates.
     private static func computePaths(from stops: [TourStop]) -> [TourPath] {
-        let sorted = stops.sorted { $0.order < $1.order }
-        guard sorted.count >= 2 else { return [] }
-        return zip(sorted, sorted.dropFirst()).map { from, to in
-            let meters = from.clLocation.distance(from: to.clLocation)
-            let feet = Int(meters * 3.28084)
-            let walkMin = max(1, Int(ceil(Double(feet) / 264.0)))
-            let bikeMin = max(1, Int(ceil(Double(feet) / 880.0)))
-            return TourPath(walkMinutes: walkMin, bikeMinutes: bikeMin, distanceFeet: feet)
-        }
+        WalkingTour.computePaths(from: stops)
     }
 
     /// Estimate duration in seconds from narration text (~150 words/min, ~5 chars/word).
@@ -329,7 +320,7 @@ enum AuthoredWalkingTours {
     // MARK: - Tour 2: McCrillis Gardens
 
     static var mccrillis: WalkingTour {
-        let stops = mccrillistStops
+        let stops = mccrillisStops
         return WalkingTour(
             id: "mccrillis-gardens",
             title: "A Garden for All Seasons",
@@ -346,7 +337,7 @@ enum AuthoredWalkingTours {
         )
     }
 
-    private static var mccrillistStops: [TourStop] {
+    private static var mccrillisStops: [TourStop] {
         let texts: [(id: String, order: Int, title: String, desc: String, lat: Double, lng: Double, radius: Double, text: String, nav: String?)] = [
             (
                 "mc-01-entrance", 1, "The Gift of a Garden",

@@ -43,6 +43,3 @@ struct StopPreviewMap: View {
         .mapStyle(.standard(elevation: .flat))
     }
 }
-
-// Keep the old name as a typealias for backward compatibility
-typealias WaypointPreviewMap = StopPreviewMap

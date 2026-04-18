@@ -315,7 +315,9 @@ struct TourOverviewView: View {
         let sortedStops = tour.sortedStops
         let paths = tour.paths
 
-        if isInTransit {
+        if sortedStops.isEmpty {
+            EmptyView()
+        } else if isInTransit {
             let nextIndex = min(player.currentStopIndex + 1, sortedStops.count - 1)
             let nextStop = sortedStops[nextIndex]
             let distanceFeet = player.currentStopIndex < paths.count
@@ -329,23 +331,20 @@ struct TourOverviewView: View {
                 navigateDistanceFeet: distanceFeet
             )
         } else {
-            let stopIdx = isPlayerActive ? player.currentStopIndex : 0
+            let stopIdx = min(isPlayerActive ? player.currentStopIndex : 0, sortedStops.count - 1)
             DockedPlayerBanner(
                 tour: tour,
-                currentStopIndex: min(stopIdx, sortedStops.count - 1),
+                currentStopIndex: stopIdx,
                 atStop: !isPlayerActive || !player.hasStarted || (isPlayerActive && player.playbackMode == .listening && !player.isPlaying)
             )
             .onTapGesture {
                 if isPlayerActive && player.isPlaying {
-                    // Open segment player — setting selectedSegment triggers fullScreenCover(item:)
-                    let stop = sortedStops[stopIdx]
-                    let segments = stop.segments
+                    let segments = sortedStops[stopIdx].segments
                     if !segments.isEmpty {
                         selectedStopIndex = stopIdx
                         selectedSegment = segments[0]
                     }
                 } else if !isPlayerActive {
-                    // Start tour
                     player.startTour(tour)
                 }
             }
