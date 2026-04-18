@@ -339,6 +339,7 @@ enum AuthoredWalkingTours {
             mode: .walking,
             stops: stops,
             paths: computePaths(from: stops),
+            coverImageName: "TourImages/mccrillis-garden-hero",
             createdAt: Date(timeIntervalSince1970: 1744761600),
             updatedAt: Date(timeIntervalSince1970: 1744761600),
             isAuthored: true
@@ -481,6 +482,7 @@ enum AuthoredWalkingTours {
             mode: .walking,
             stops: stops,
             paths: computePaths(from: stops),
+            coverImageName: "TourImages/rock-creek-hero",
             createdAt: Date(timeIntervalSince1970: 1744761600),
             updatedAt: Date(timeIntervalSince1970: 1744761600),
             isAuthored: true
