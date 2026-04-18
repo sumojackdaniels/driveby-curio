@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 import CoreSwift
 
 // Walking tour browser — redesigned to match the Tour Consumption wireframe.
