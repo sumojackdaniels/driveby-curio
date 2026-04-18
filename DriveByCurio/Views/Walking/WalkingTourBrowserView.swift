@@ -292,15 +292,32 @@ private struct TourFeedCard: View {
     let tour: WalkingTour
     private let cardHeight: CGFloat = 148
 
+    /// Walk time — use tour data if available, otherwise mock based on stop count
+    private var walkMinutes: Int {
+        let t = tour.totalWalkMinutes
+        return t > 0 ? t : max(5, tour.totalStops * 6)
+    }
+
+    /// Bike time — use tour data if available, otherwise mock
+    private var bikeMinutes: Int {
+        let t = tour.totalBikeMinutes
+        return t > 0 ? t : max(2, tour.totalStops * 2)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Card: photo + map
-            HStack(spacing: 0) {
-                // Photo (2/3)
-                photoSection
+            // Card: photo (2/3) + map (1/3) via containerRelativeFrame-like ratio
+            GeometryReader { geo in
+                let mapWidth = geo.size.width / 3
+                HStack(spacing: 0) {
+                    // Photo (2/3)
+                    photoSection
+                        .frame(width: geo.size.width - mapWidth)
 
-                // Map placeholder (1/3)
-                mapSection
+                    // Map placeholder (1/3)
+                    mapSection
+                        .frame(width: mapWidth)
+                }
             }
             .frame(height: cardHeight)
             .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -350,8 +367,6 @@ private struct TourFeedCard: View {
             .padding(.horizontal, 12)
             .padding(.bottom, 10)
         }
-        .frame(maxWidth: .infinity)
-        .layoutPriority(2)
     }
 
     // Map placeholder with walk/bike estimates
@@ -371,6 +386,7 @@ private struct TourFeedCard: View {
                     .background(.white.opacity(0.7))
                     .clipShape(RoundedRectangle(cornerRadius: 4))
             }
+            .frame(maxHeight: .infinity)
 
             // Walk/bike estimates
             Divider()
@@ -379,7 +395,7 @@ private struct TourFeedCard: View {
                 HStack(spacing: 4) {
                     Image(systemName: "figure.walk")
                         .font(.system(size: 9))
-                    Text("\(tour.totalWalkMinutes)m")
+                    Text("\(walkMinutes)m")
                         .font(.caption2)
                         .fontWeight(.medium)
                 }
@@ -392,7 +408,7 @@ private struct TourFeedCard: View {
                 HStack(spacing: 4) {
                     Image(systemName: "bicycle")
                         .font(.system(size: 9))
-                    Text("\(tour.totalBikeMinutes)m")
+                    Text("\(bikeMinutes)m")
                         .font(.caption2)
                         .fontWeight(.medium)
                 }
@@ -408,8 +424,6 @@ private struct TourFeedCard: View {
                 .frame(width: 0.5),
             alignment: .leading
         )
-        .frame(maxWidth: .infinity)
-        .layoutPriority(1)
     }
 
     // Title + author + rating below the card
