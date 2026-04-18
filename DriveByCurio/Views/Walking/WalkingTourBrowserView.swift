@@ -518,13 +518,13 @@ private struct CompactStopMap: View {
         let snapshotter = MKMapSnapshotter(options: options)
         guard let result = try? await snapshotter.start() else { return }
 
-        let image = result.snapshot.image
+        let image = result.image
         let sorted = stops.sorted { $0.order < $1.order }
 
         // Draw dots and polyline onto the snapshot
         let renderer = UIGraphicsImageRenderer(size: size)
         snapshot = renderer.image { ctx in
-            image.draw(at: .zero)
+            image.draw(at: CGPoint.zero)
 
             let gc = ctx.cgContext
 
@@ -534,7 +534,7 @@ private struct CompactStopMap: View {
                 gc.setLineWidth(2)
                 gc.setLineCap(.round)
                 gc.setLineJoin(.round)
-                let points = sorted.map { result.snapshot.point(for: $0.coordinate) }
+                let points = sorted.map { result.point(for: $0.coordinate) }
                 gc.move(to: points[0])
                 for pt in points.dropFirst() { gc.addLine(to: pt) }
                 gc.strokePath()
@@ -543,7 +543,7 @@ private struct CompactStopMap: View {
             // Dots
             gc.setFillColor(UIColor.systemGreen.cgColor)
             for stop in sorted {
-                let pt = result.snapshot.point(for: stop.coordinate)
+                let pt = result.point(for: stop.coordinate)
                 let dotSize: CGFloat = 8
                 let rect = CGRect(
                     x: pt.x - dotSize / 2,
