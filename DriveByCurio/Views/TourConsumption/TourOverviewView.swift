@@ -97,20 +97,20 @@ struct TourOverviewView: View {
                 endPoint: .bottom
             )
 
-            // Content overlay
+            // Content overlay — pinned to bottom-leading
             VStack(alignment: .leading, spacing: 0) {
-                Spacer()
-
                 // Title
                 Text(tour.title)
                     .font(.system(size: 28, weight: .regular, design: .serif))
                     .foregroundStyle(.white)
                     .lineSpacing(2)
+                    .multilineTextAlignment(.leading)
 
                 // Meta line: walk · bike · distance
                 metaLine
                     .padding(.top, 12)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
             .padding(.bottom, 18)
 
