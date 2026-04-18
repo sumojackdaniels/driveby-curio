@@ -9,19 +9,27 @@ struct PhotoPlaceholder: View {
     var label: String = "photo"
     var height: CGFloat = 140
     var cornerRadius: CGFloat = 14
+    var imageName: String? = nil
 
     var body: some View {
         ZStack {
-            // Solid placeholder background (avoids Canvas/Metal rendering stalls)
-            Color(.systemGray6)
+            if let imageName, let _ = UIImage(named: imageName) {
+                Image(imageName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } else {
+                // Solid placeholder background (avoids Canvas/Metal rendering stalls)
+                Color(.systemGray6)
 
-            // Label
-            Text("[\(label)]")
-                .font(.system(.caption2, design: .monospaced))
-                .foregroundStyle(.secondary.opacity(0.6))
-                .tracking(0.3)
+                // Label
+                Text("[\(label)]")
+                    .font(.system(.caption2, design: .monospaced))
+                    .foregroundStyle(.secondary.opacity(0.6))
+                    .tracking(0.3)
+            }
         }
         .frame(height: height)
+        .clipped()
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
     }
 }

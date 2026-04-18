@@ -159,7 +159,7 @@ private struct TourHeroCard: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             // Photo
-            PhotoPlaceholder(label: "guide portrait", height: 340, cornerRadius: 0)
+            PhotoPlaceholder(label: "guide portrait", height: 340, cornerRadius: 0, imageName: tour.coverImageName)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
 
             // Gradient
@@ -317,7 +317,8 @@ private struct TourFeedCard: View {
             PhotoPlaceholder(
                 label: "\(tour.title) photo",
                 height: cardHeight,
-                cornerRadius: 0
+                cornerRadius: 0,
+                imageName: tour.coverImageName
             )
 
             // Bottom gradient for tag legibility

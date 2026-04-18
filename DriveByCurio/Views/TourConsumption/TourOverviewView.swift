@@ -80,7 +80,8 @@ struct TourOverviewView: View {
             PhotoPlaceholder(
                 label: "\(tour.title) cover",
                 height: TourTokens.heroHeight,
-                cornerRadius: 0
+                cornerRadius: 0,
+                imageName: tour.coverImageName
             )
 
             // Gradient overlay

@@ -53,6 +53,7 @@ enum AuthoredWalkingTours {
             mode: .walking,
             stops: stops,
             paths: computePaths(from: stops),
+            coverImageName: "TourImages/postwar-dreams-hero",
             createdAt: Date(timeIntervalSince1970: 1744761600),
             updatedAt: Date(timeIntervalSince1970: 1744761600),
             isAuthored: true

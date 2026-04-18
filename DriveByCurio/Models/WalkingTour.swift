@@ -163,6 +163,7 @@ struct WalkingTour: Identifiable, Codable, Equatable, Hashable {
     var mode: TourMode
     var stops: [TourStop]
     var paths: [TourPath]
+    var coverImageName: String?  // Asset catalog image name (e.g. "TourImages/postwar-dreams-hero")
     var createdAt: Date
     var updatedAt: Date
     var isAuthored: Bool  // true = pre-built ElevenLabs audio
@@ -224,7 +225,7 @@ struct WalkingTour: Identifiable, Codable, Equatable, Hashable {
 
     enum CodingKeys: String, CodingKey {
         case id, title, author, description, tags, mode
-        case stops, paths
+        case stops, paths, coverImageName
         case createdAt, updatedAt, isAuthored
         // Legacy keys
         case creatorName, creatorIsLocal, waypoints
@@ -239,6 +240,7 @@ struct WalkingTour: Identifiable, Codable, Equatable, Hashable {
         mode: TourMode,
         stops: [TourStop],
         paths: [TourPath],
+        coverImageName: String? = nil,
         createdAt: Date,
         updatedAt: Date,
         isAuthored: Bool
@@ -251,6 +253,7 @@ struct WalkingTour: Identifiable, Codable, Equatable, Hashable {
         self.mode = mode
         self.stops = stops
         self.paths = paths
+        self.coverImageName = coverImageName
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.isAuthored = isAuthored
@@ -267,6 +270,7 @@ struct WalkingTour: Identifiable, Codable, Equatable, Hashable {
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
         isAuthored = try container.decode(Bool.self, forKey: .isAuthored)
+        coverImageName = try container.decodeIfPresent(String.self, forKey: .coverImageName)
 
         // Try new format first
         if let newAuthor = try? container.decode(TourAuthor.self, forKey: .author) {
