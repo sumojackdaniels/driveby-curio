@@ -7,9 +7,6 @@ import CoreSwift
 // User walks around, tapping "Add Stop" to drop a pin at their
 // current GPS position. Each pin can be edited with title, trigger
 // radius, and audio recordings.
-//
-// This file keeps the old name WaypointMapEditorView as a typealias
-// but the primary type is now StopMapEditorView.
 
 struct StopMapEditorView: View {
     @State var tour: WalkingTour
@@ -246,25 +243,12 @@ struct StopMapEditorView: View {
     }
 
     private func saveTour() {
-        // Recompute paths from GPS coordinates before saving
-        let sorted = tour.stops.sorted { $0.order < $1.order }
-        if sorted.count >= 2 {
-            tour.paths = zip(sorted, sorted.dropFirst()).map { from, to in
-                let meters = from.clLocation.distance(from: to.clLocation)
-                let feet = Int(meters * 3.28084)
-                let walkMin = max(1, Int(ceil(Double(feet) / 264.0)))
-                let bikeMin = max(1, Int(ceil(Double(feet) / 880.0)))
-                return TourPath(walkMinutes: walkMin, bikeMinutes: bikeMin, distanceFeet: feet)
-            }
-        }
+        tour.paths = WalkingTour.computePaths(from: tour.stops)
         tour.updatedAt = Date()
         tourStore.saveUserTour(tour)
         showSaveConfirmation = true
     }
 }
-
-// Keep old name as typealias
-typealias WaypointMapEditorView = StopMapEditorView
 
 // MARK: - Stop Map Marker
 
@@ -284,6 +268,3 @@ struct StopMarker: View {
         .shadow(radius: 2)
     }
 }
-
-// Keep old name as typealias
-typealias WaypointMarker = StopMarker

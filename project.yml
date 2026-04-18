@@ -56,3 +56,29 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UIRequiresFullScreen: true
+
+  DriveByCurioTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/DriveByCurioTests
+    dependencies:
+      - target: DriveByCurio
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        BUNDLE_LOADER: $(TEST_HOST)
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/DriveByCurio.app/DriveByCurio
+
+schemes:
+  DriveByCurio:
+    build:
+      targets:
+        DriveByCurio: all
+        DriveByCurioTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - DriveByCurioTests

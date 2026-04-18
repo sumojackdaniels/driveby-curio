@@ -148,7 +148,7 @@ struct SegmentPlayerView: View {
                 barCount: 52,
                 playedColor: TourTokens.ink,
                 unplayedColor: TourTokens.faint,
-                seed: stopIndex + segment.id.hashValue % 100
+                seed: stopIndex + (segment.id.hashValue % 100)
             )
             .frame(height: 40)
 

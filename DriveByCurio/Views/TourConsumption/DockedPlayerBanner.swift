@@ -18,27 +18,29 @@ struct DockedPlayerBanner: View {
     var navigateAddress: String? = nil
     var navigateDistanceFeet: Int? = nil
 
-    private var currentStop: TourStop {
-        tour.sortedStops[currentStopIndex]
+    private var currentStop: TourStop? {
+        let sorted = tour.sortedStops
+        guard (0..<sorted.count).contains(currentStopIndex) else { return nil }
+        return sorted[currentStopIndex]
     }
 
     private var currentSegment: TourSegment? {
-        let segments = currentStop.segments
-        guard currentSegmentIndex < segments.count else { return nil }
-        return segments[currentSegmentIndex]
+        guard let stop = currentStop,
+              (0..<stop.segments.count).contains(currentSegmentIndex) else { return nil }
+        return stop.segments[currentSegmentIndex]
     }
 
     var body: some View {
         if let address = navigateAddress, let distance = navigateDistanceFeet {
             navigateBanner(address: address, distanceFeet: distance)
-        } else {
-            playerBanner
+        } else if let stop = currentStop {
+            playerBanner(for: stop)
         }
     }
 
     // MARK: - Player Banner
 
-    private var playerBanner: some View {
+    private func playerBanner(for currentStop: TourStop) -> some View {
         VStack(spacing: 0) {
             // Progress bar — no GeometryReader, uses scaleEffect for sizing
             ZStack(alignment: .leading) {

@@ -405,12 +405,12 @@ private struct TourFeedCard: View {
             .padding(.vertical, 6)
         }
         .background(Color(.systemBackground))
-        .overlay(
+        .overlay(alignment: .leading) {
             Rectangle()
                 .fill(TourTokens.hairline)
-                .frame(width: 0.5),
-            alignment: .leading
-        )
+                .frame(width: 0.5)
+                .frame(maxHeight: .infinity)
+        }
     }
 
     // Title + author + rating below the card
