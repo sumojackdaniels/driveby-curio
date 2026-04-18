@@ -371,9 +371,13 @@ private struct TourFeedCard: View {
     // Map inlay with walk/bike estimates
     private var mapSection: some View {
         VStack(spacing: 0) {
-            // Compact map — small dots, no labels, no attribution
+            // Compact map — small dots, no labels
+            // Extra 20pt height + negative bottom padding clips the
+            // Apple Maps logo and "Legal" link off the visible area.
             CompactStopMap(stops: tour.sortedStops)
                 .frame(maxHeight: .infinity)
+                .padding(.bottom, -20)
+                .clipped()
 
             // Walk/bike estimates
             Divider()
@@ -482,9 +486,8 @@ private struct CompactStopMap: UIViewRepresentable {
         // Hide "Maps" logo and "Legal" link
         map.showsCompass = false
         map.showsScale = false
-        if #available(iOS 26.0, *) {
-            map.showsAttributionButton = .hidden
-        }
+        // Attribution (Maps logo + Legal) is hidden by the SwiftUI
+        // wrapper clipping the bottom 20pt off the map view.
         return map
     }
 
