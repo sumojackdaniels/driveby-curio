@@ -367,24 +367,13 @@ private struct TourFeedCard: View {
         }
     }
 
-    // Map placeholder with walk/bike estimates
+    // Map inlay with walk/bike estimates
     private var mapSection: some View {
         VStack(spacing: 0) {
-            // Map placeholder
-            ZStack {
-                Color(.systemGray6)
-                Text("[map]")
-                    .font(.system(size: 10, design: .monospaced))
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.secondary.opacity(0.6))
-                    .tracking(0.6)
-                    .textCase(.uppercase)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(.white.opacity(0.7))
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-            }
-            .frame(maxHeight: .infinity)
+            // Live map showing tour stops
+            StopPreviewMap(stops: tour.sortedStops)
+                .disabled(true) // non-interactive in feed card
+                .frame(maxHeight: .infinity)
 
             // Walk/bike estimates
             Divider()
