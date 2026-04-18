@@ -64,6 +64,10 @@ struct TourOverviewView: View {
                     segment: segment,
                     progress: isPlayerActive ? player.audioCurrentTime / max(1, player.audioDuration) : 0
                 )
+                // fullScreenCover creates a separate presentation tree —
+                // @Environment objects from the parent are NOT inherited.
+                // Re-inject so SegmentPlayerView can read WalkingTourPlayer.
+                .environment(player)
             }
         }
     }

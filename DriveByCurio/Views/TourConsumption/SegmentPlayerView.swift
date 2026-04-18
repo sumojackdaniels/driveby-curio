@@ -42,7 +42,7 @@ struct SegmentPlayerView: View {
             // Top bar
             topBar
 
-            // Scrollable content
+            // Scrollable content — takes all remaining space
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
                     // Segment meta + title
@@ -56,10 +56,9 @@ struct SegmentPlayerView: View {
                         .padding(.top, 18)
                 }
             }
+            .frame(maxHeight: .infinity)
 
-            Spacer()
-
-            // Bottom controls
+            // Bottom controls — pinned to bottom
             bottomControls
         }
         .background(Color(red: 0.984, green: 0.976, blue: 0.957)) // #fbf9f4
