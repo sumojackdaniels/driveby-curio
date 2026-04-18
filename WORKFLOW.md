@@ -45,6 +45,18 @@ Quick rules (full detail in `previews-guide.md`):
 5. Build to simulator, screenshot, verify visually
 6. Commit
 
+### Running tests
+
+```
+xcodebuild test -project DriveByCurio.xcodeproj -scheme DriveByCurio \
+  -destination 'platform=iOS Simulator,name=iPhone 17' \
+  -derivedDataPath /tmp/curio-build
+```
+
+Scope a single case with `-only-testing:DriveByCurioTests/WalkingTourTests/testName`.
+
+Test target lives at `Tests/DriveByCurioTests/` and is wired in via `project.yml` — `xcodegen generate` before running if the target was just added.
+
 ## Git Conventions
 
 - Branch: `feature/<name>` or `fix/<name>`

@@ -7,8 +7,10 @@ Walking tour platform — pre-authored and user-created audio tours, triggered b
 - XcodeGen: `xcodegen generate` (always before build)
 - Build path: `/tmp/curio-build`
 - Shared package: core-swift (SPM) — `LocationService`, `HeadingCalculator`, `APIClient`
-- Tour assets: `DriveByCurio/WalkingTours/{tour-id}/{waypoint-id}/` (audio bundled as folder reference)
+- Tour assets: `DriveByCurio/WalkingTours/{tour-id}/{stop-id}/` (audio bundled as folder reference)
+- Tests: `Tests/DriveByCurioTests/` — run with `xcodebuild test ... -destination 'platform=iOS Simulator,name=iPhone 17'`
 - Archive: `archive/` holds the CarPlay prototype, driving-tour backend, and legacy specs. Not built by Xcode. Reference only.
+- Lessons: see [TECHNOLOGIES.md](TECHNOLOGIES.md) before adding SwiftUI nav/presentation or MapKit snapshot code — it captures gotchas we've already hit.
 
 ## Do
 
