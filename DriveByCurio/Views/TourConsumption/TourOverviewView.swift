@@ -111,7 +111,7 @@ struct TourOverviewView: View {
                 metaLine
                     .padding(.top, 12)
             }
-            .padding(.horizontal, TourTokens.horizontalPadding)
+            .padding(.horizontal, 16)
             .padding(.bottom, 18)
 
             // Back button — pinned to top-left
