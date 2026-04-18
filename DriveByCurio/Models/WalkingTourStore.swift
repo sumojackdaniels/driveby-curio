@@ -20,9 +20,23 @@ final class WalkingTourStore {
         loadAll()
     }
 
+    /// Default cover images for user tours by keyword match.
+    private static let defaultCoverImages: [(keyword: String, imageName: String)] = [
+        ("rock creek", "TourImages/rock-creek-hero"),
+    ]
+
     func loadAll() {
         authoredTours = AuthoredWalkingTours.all
-        userTours = storage.loadUserTours()
+        userTours = storage.loadUserTours().map { tour in
+            var t = tour
+            if t.coverImageName == nil {
+                for entry in Self.defaultCoverImages where t.title.localizedCaseInsensitiveContains(entry.keyword) {
+                    t.coverImageName = entry.imageName
+                    break
+                }
+            }
+            return t
+        }
     }
 
     func saveUserTour(_ tour: WalkingTour) {
