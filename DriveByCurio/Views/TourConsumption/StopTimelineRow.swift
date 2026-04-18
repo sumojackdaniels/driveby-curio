@@ -32,9 +32,67 @@ struct StopTimelineRow: View {
         case arrived      // at stop, not playing
         case playing      // at stop, audio playing
         case approaching  // in transit, this is the target
+
+        /// Resolve the display state for a single stop in the timeline.
+        /// Pure function — no SwiftUI or environment dependencies, so it's testable.
+        ///
+        /// - Parameters:
+        ///   - index: This row's position in the sorted-stops array.
+        ///   - isPlayerActive: Whether a tour is currently active for this view's tour.
+        ///   - playerStopIndex: The player's current stop index (ignored if !isPlayerActive).
+        ///   - transitFromIndex: If >= 0, the player is in transit *from* that index. -1 when not.
+        ///   - playbackMode: Current playback mode. Ignored if !isPlayerActive.
+        ///   - isPlaying: Whether audio is currently playing. Ignored if !isPlayerActive.
+        ///   - hasStarted: Whether the tour has been started. Ignored if !isPlayerActive.
+        static func resolve(
+            index: Int,
+            isPlayerActive: Bool,
+            playerStopIndex: Int,
+            transitFromIndex: Int,
+            playbackMode: WalkingPlaybackMode,
+            isPlaying: Bool,
+            hasStarted: Bool
+        ) -> StopState {
+            // Pre-start: treat the first stop as "arrived" so its dot pulses
+            // green and invites the user to tap Play. All other stops are
+            // pending until the tour is active.
+            guard isPlayerActive else {
+                return index == 0 ? .arrived : .pending
+            }
+
+            if transitFromIndex >= 0 {
+                if index <= transitFromIndex { return .done }
+                if index == transitFromIndex + 1 { return .approaching }
+                return .pending
+            }
+
+            if index < playerStopIndex { return .done }
+            if index == playerStopIndex {
+                if playbackMode == .listening && isPlaying {
+                    return .playing
+                }
+                if !hasStarted || playbackMode == .listening {
+                    return .arrived
+                }
+                return .current
+            }
+            return .pending
+        }
     }
 
     private var isLast: Bool { index == totalStops - 1 }
+
+    // MARK: - Timeline geometry constants
+    //
+    // The timeline column is 34pt wide. The dot ZStack is 24pt and is
+    // horizontally centered inside the column. Derive line placement from
+    // these so the connecting line sits exactly under the dot center.
+    private static let columnWidth: CGFloat = 34
+    private static let dotBoxSize: CGFloat = 24
+    private static let dotTopOffset: CGFloat = 6
+    private static let lineThickness: CGFloat = 1.5
+    private static var lineCenterX: CGFloat { columnWidth / 2 }
+    private static var lineStartY: CGFloat { dotTopOffset + dotBoxSize + 4 }
 
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
@@ -95,18 +153,18 @@ struct StopTimelineRow: View {
                 GeometryReader { geo in
                     if isTransitFromHere {
                         Path { path in
-                            path.move(to: CGPoint(x: 11.5, y: 28))
-                            path.addLine(to: CGPoint(x: 11.5, y: geo.size.height))
+                            path.move(to: CGPoint(x: Self.lineCenterX, y: Self.lineStartY))
+                            path.addLine(to: CGPoint(x: Self.lineCenterX, y: geo.size.height))
                         }
-                        .stroke(TourTokens.ember, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+                        .stroke(TourTokens.ember, style: StrokeStyle(lineWidth: Self.lineThickness, dash: [4, 3]))
                     } else {
                         Rectangle()
                             .fill(stopState == .done || stopState == .playing || stopState == .arrived ? TourTokens.moss : TourTokens.faint)
-                            .frame(width: 1.5)
-                            .offset(x: 10.75, y: 28)
+                            .frame(width: Self.lineThickness)
+                            .offset(x: Self.lineCenterX - Self.lineThickness / 2, y: Self.lineStartY)
                     }
                 }
-                .frame(width: 34)
+                .frame(width: Self.columnWidth)
             }
         }
     }

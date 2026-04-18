@@ -285,27 +285,15 @@ struct TourOverviewView: View {
         playerStopIndex: Int,
         transitFromIndex: Int
     ) -> StopTimelineRow.StopState {
-        guard isPlayerActive else {
-            return index == 0 ? .current : .pending
-        }
-
-        if transitFromIndex >= 0 {
-            if index <= transitFromIndex { return .done }
-            if index == transitFromIndex + 1 { return .approaching }
-            return .pending
-        }
-
-        if index < playerStopIndex { return .done }
-        if index == playerStopIndex {
-            if player.playbackMode == .listening && player.isPlaying {
-                return .playing
-            }
-            if !player.hasStarted || player.playbackMode == .listening {
-                return .arrived
-            }
-            return .current
-        }
-        return .pending
+        StopTimelineRow.StopState.resolve(
+            index: index,
+            isPlayerActive: isPlayerActive,
+            playerStopIndex: playerStopIndex,
+            transitFromIndex: transitFromIndex,
+            playbackMode: player.playbackMode,
+            isPlaying: player.isPlaying,
+            hasStarted: player.hasStarted
+        )
     }
 
     // MARK: - Docked Banner
