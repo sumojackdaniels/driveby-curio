@@ -28,6 +28,8 @@ struct PhotoPlaceholder: View {
                     .tracking(0.3)
             }
         }
+        // Constrain width BEFORE height so .fill doesn't blow out the layout
+        .frame(maxWidth: .infinity)
         .frame(height: height)
         .clipped()
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
