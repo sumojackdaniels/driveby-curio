@@ -12,26 +12,28 @@ struct PhotoPlaceholder: View {
     var imageName: String? = nil
 
     var body: some View {
-        ZStack {
+        Group {
             if let imageName, let _ = UIImage(named: imageName) {
-                Image(imageName)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
+                // Color.clear sets the layout size; the image fills via
+                // overlay so it can't blow out the parent's width.
+                Color.clear
+                    .overlay {
+                        Image(imageName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    }
+                    .clipped()
             } else {
-                // Solid placeholder background (avoids Canvas/Metal rendering stalls)
-                Color(.systemGray6)
-
-                // Label
-                Text("[\(label)]")
-                    .font(.system(.caption2, design: .monospaced))
-                    .foregroundStyle(.secondary.opacity(0.6))
-                    .tracking(0.3)
+                ZStack {
+                    Color(.systemGray6)
+                    Text("[\(label)]")
+                        .font(.system(.caption2, design: .monospaced))
+                        .foregroundStyle(.secondary.opacity(0.6))
+                        .tracking(0.3)
+                }
             }
         }
-        // Constrain width BEFORE height so .fill doesn't blow out the layout
-        .frame(maxWidth: .infinity)
         .frame(height: height)
-        .clipped()
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
     }
 }
