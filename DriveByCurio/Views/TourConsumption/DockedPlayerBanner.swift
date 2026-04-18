@@ -40,16 +40,17 @@ struct DockedPlayerBanner: View {
 
     private var playerBanner: some View {
         VStack(spacing: 0) {
-            // Progress bar
-            GeometryReader { geo in
-                let progressWidth = atStop ? 0.0 : min(0.92, Double(currentStopIndex) / Double(tour.totalStops)) * geo.size.width
-                ZStack(alignment: .leading) {
-                    Rectangle()
-                        .fill(.white.opacity(0.12))
-                    Rectangle()
-                        .fill(TourTokens.moss)
-                        .frame(width: progressWidth)
-                }
+            // Progress bar — no GeometryReader, uses scaleEffect for sizing
+            ZStack(alignment: .leading) {
+                Rectangle()
+                    .fill(.white.opacity(0.12))
+                Rectangle()
+                    .fill(TourTokens.moss)
+                    .scaleEffect(
+                        x: atStop ? 0 : min(0.92, Double(currentStopIndex) / Double(max(1, tour.totalStops))),
+                        y: 1,
+                        anchor: .leading
+                    )
             }
             .frame(height: 2)
 
@@ -136,22 +137,18 @@ struct DockedPlayerBanner: View {
 
     private func navigateBanner(address: String, distanceFeet: Int) -> some View {
         VStack(spacing: 0) {
-            // Striped progress bar
-            Rectangle()
-                .fill(.white.opacity(0.18))
-                .frame(height: 2)
-                .overlay(
-                    GeometryReader { geo in
-                        HStack(spacing: 8) {
-                            ForEach(0..<Int(geo.size.width / 14), id: \.self) { _ in
-                                Rectangle()
-                                    .fill(.white.opacity(0.35))
-                                    .frame(width: 6)
-                            }
-                        }
-                    }
-                )
-                .clipped()
+            // Striped progress bar — fixed stripe count, no GeometryReader
+            HStack(spacing: 8) {
+                ForEach(0..<28, id: \.self) { _ in
+                    Rectangle()
+                        .fill(.white.opacity(0.35))
+                        .frame(width: 6, height: 2)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: 2)
+            .background(.white.opacity(0.18))
+            .clipped()
 
             // Content
             HStack(spacing: 12) {

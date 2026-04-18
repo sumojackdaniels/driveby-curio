@@ -16,8 +16,7 @@ struct TourOverviewView: View {
     // Tour state
     @State private var currentStopIndex: Int = 0
     @State private var expandedStopIndex: Int? = nil
-    @State private var showSegmentPlayer = false
-    @State private var selectedSegment: TourSegment?
+    @State private var selectedSegment: TourSegment?  // non-nil triggers fullScreenCover
     @State private var selectedStopIndex: Int = 0
 
     // Derived state
@@ -30,8 +29,9 @@ struct TourOverviewView: View {
             // Main scrollable content
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    // Hero
+                    // Hero — only this section extends into the top safe area
                     heroSection
+                        .ignoresSafeArea(edges: .top)
 
                     // Author
                     authorSection
@@ -54,21 +54,23 @@ struct TourOverviewView: View {
             // Docked banner
             dockedBanner
         }
-        .ignoresSafeArea(edges: .top)
+        // Do NOT apply .ignoresSafeArea to this ZStack — it causes a
+        // layout deadlock on NavigationStack push (view collapses to zero
+        // height until a background/foreground cycle forces re-layout).
+        // Instead, .ignoresSafeArea is scoped to heroSection only.
         .toolbarVisibility(.hidden, for: .navigationBar)
-        .fullScreenCover(isPresented: $showSegmentPlayer) {
-            if let segment = selectedSegment {
-                SegmentPlayerView(
-                    tour: tour,
-                    stopIndex: selectedStopIndex,
-                    segment: segment,
-                    progress: isPlayerActive ? player.audioCurrentTime / max(1, player.audioDuration) : 0
-                )
-                // fullScreenCover creates a separate presentation tree —
-                // @Environment objects from the parent are NOT inherited.
-                // Re-inject so SegmentPlayerView can read WalkingTourPlayer.
-                .environment(player)
-            }
+        // Use item: overload — guarantees segment is non-nil when the
+        // cover presents. The isPresented: + if-let pattern can race.
+        .fullScreenCover(item: $selectedSegment) { segment in
+            SegmentPlayerView(
+                tour: tour,
+                stopIndex: selectedStopIndex,
+                segment: segment,
+                progress: isPlayerActive ? player.audioCurrentTime / max(1, player.audioDuration) : 0
+            )
+            // fullScreenCover creates a separate presentation tree —
+            // @Environment objects from the parent are NOT inherited.
+            .environment(player)
         }
     }
 
@@ -335,13 +337,12 @@ struct TourOverviewView: View {
             )
             .onTapGesture {
                 if isPlayerActive && player.isPlaying {
-                    // Open segment player
+                    // Open segment player — setting selectedSegment triggers fullScreenCover(item:)
                     let stop = sortedStops[stopIdx]
                     let segments = stop.segments
                     if !segments.isEmpty {
-                        selectedSegment = segments[0]
                         selectedStopIndex = stopIdx
-                        showSegmentPlayer = true
+                        selectedSegment = segments[0]
                     }
                 } else if !isPlayerActive {
                     // Start tour

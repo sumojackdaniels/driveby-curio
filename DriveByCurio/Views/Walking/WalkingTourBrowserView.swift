@@ -65,9 +65,9 @@ struct WalkingTourBrowserView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .navigationBarHidden(true)
+            .toolbarVisibility(.hidden, for: .navigationBar)
             .navigationDestination(for: WalkingTour.self) { tour in
-                WalkingTourDetailView(tour: tour)
+                TourOverviewView(tour: tour)
             }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
