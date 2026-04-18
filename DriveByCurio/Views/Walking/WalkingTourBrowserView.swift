@@ -466,30 +466,97 @@ private struct TourFeedCard: View {
 
 // MARK: - Compact Stop Map
 //
-// Minimal map for feed card inlays — small dots, no numbers, no
-// Apple Maps logo. Non-interactive.
+// Minimal UIKit map for feed card inlays — small green dots, no
+// labels, no "Maps" logo, no "Legal" link. Non-interactive.
+// Uses MKMapView directly for full control over attribution visibility.
 
-private struct CompactStopMap: View {
+private struct CompactStopMap: UIViewRepresentable {
     let stops: [TourStop]
 
-    var body: some View {
-        Map {
-            ForEach(stops) { stop in
-                Annotation("", coordinate: stop.coordinate) {
-                    Circle()
-                        .fill(.green)
-                        .frame(width: 10, height: 10)
-                }
-            }
-
-            if stops.count >= 2 {
-                let coords = stops.sorted { $0.order < $1.order }.map(\.coordinate)
-                MapPolyline(coordinates: coords)
-                    .stroke(.green.opacity(0.6), lineWidth: 2)
-            }
+    func makeUIView(context: Context) -> MKMapView {
+        let map = MKMapView()
+        map.isUserInteractionEnabled = false
+        map.showsUserLocation = false
+        map.mapType = .standard
+        map.pointOfInterestFilter = .excludingAll
+        // Hide "Maps" logo and "Legal" link
+        map.showsCompass = false
+        map.showsScale = false
+        if #available(iOS 26.0, *) {
+            map.showsAttributionButton = .hidden
         }
-        .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
-        .mapControlVisibility(.hidden)
-        .allowsHitTesting(false)
+        return map
+    }
+
+    func updateUIView(_ map: MKMapView, context: Context) {
+        map.removeOverlays(map.overlays)
+        map.removeAnnotations(map.annotations)
+
+        guard !stops.isEmpty else { return }
+
+        let sorted = stops.sorted { $0.order < $1.order }
+
+        // Add dot annotations
+        for stop in sorted {
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = stop.coordinate
+            map.addAnnotation(annotation)
+        }
+
+        // Add polyline
+        if sorted.count >= 2 {
+            let coords = sorted.map(\.coordinate)
+            let polyline = MKPolyline(coordinates: coords, count: coords.count)
+            map.addOverlay(polyline)
+        }
+
+        // Fit to bounding region with padding
+        let lats = sorted.map(\.lat)
+        let lngs = sorted.map(\.lng)
+        let center = CLLocationCoordinate2D(
+            latitude: (lats.min()! + lats.max()!) / 2,
+            longitude: (lngs.min()! + lngs.max()!) / 2
+        )
+        let span = MKCoordinateSpan(
+            latitudeDelta: (lats.max()! - lats.min()!) * 1.6 + 0.002,
+            longitudeDelta: (lngs.max()! - lngs.min()!) * 1.6 + 0.002
+        )
+        map.setRegion(MKCoordinateRegion(center: center, span: span), animated: false)
+
+        // Set delegate for rendering
+        map.delegate = context.coordinator
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    class Coordinator: NSObject, MKMapViewDelegate {
+        func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+            guard !(annotation is MKUserLocation) else { return nil }
+            let id = "stop-dot"
+            let view = mapView.dequeueReusableAnnotationView(withIdentifier: id)
+                ?? MKAnnotationView(annotation: annotation, reuseIdentifier: id)
+            view.annotation = annotation
+            view.canShowCallout = false
+
+            let dot = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 10))
+            dot.backgroundColor = UIColor.systemGreen
+            dot.layer.cornerRadius = 5
+
+            view.subviews.forEach { $0.removeFromSuperview() }
+            view.addSubview(dot)
+            view.frame = dot.frame
+            view.centerOffset = .zero
+            return view
+        }
+
+        func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+            if let polyline = overlay as? MKPolyline {
+                let renderer = MKPolylineRenderer(polyline: polyline)
+                renderer.strokeColor = UIColor.systemGreen.withAlphaComponent(0.6)
+                renderer.lineWidth = 2
+                return renderer
+            }
+            return MKOverlayRenderer(overlay: overlay)
+        }
     }
 }
