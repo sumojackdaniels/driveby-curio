@@ -1,10 +1,13 @@
 import SwiftUI
 
-// Per-waypoint editor — set title, trigger radius, record content
+// Per-stop editor — set title, trigger radius, record content
 // audio (up to 5 min) and nav instruction audio (up to 15 sec).
+//
+// This file keeps the old name WaypointEditorView as a typealias
+// but the primary type is now StopEditorView.
 
-struct WaypointEditorView: View {
-    @Binding var waypoint: WalkingWaypoint
+struct StopEditorView: View {
+    @Binding var stop: TourStop
     let tourId: String
     let onDelete: () -> Void
 
@@ -14,13 +17,18 @@ struct WaypointEditorView: View {
 
     private let storage = TourStorageService.shared
 
+    private var hasContentAudio: Bool {
+        stop.segments.first?.audioFile != nil
+    }
+
     var body: some View {
         NavigationStack {
             Form {
                 Section("Stop Info") {
-                    TextField("Title", text: $waypoint.title)
-                    TextField("Description (optional)", text: $waypoint.description, axis: .vertical)
+                    TextField("Title", text: $stop.title)
+                    TextField("Description (optional)", text: $stop.description, axis: .vertical)
                         .lineLimit(2...4)
+                    TextField("Address (optional)", text: $stop.address)
                 }
 
                 Section("Trigger Area") {
@@ -30,13 +38,13 @@ struct WaypointEditorView: View {
                             .foregroundStyle(.secondary)
 
                         HStack {
-                            Text("\(Int(waypoint.triggerRadiusMeters))m")
+                            Text("\(Int(stop.triggerRadiusMeters))m")
                                 .font(.headline)
                                 .monospacedDigit()
                                 .frame(width: 50)
 
                             Slider(
-                                value: $waypoint.triggerRadiusMeters,
+                                value: $stop.triggerRadiusMeters,
                                 in: 10...100,
                                 step: 5
                             )
@@ -49,7 +57,7 @@ struct WaypointEditorView: View {
                 }
 
                 Section("Story Recording (up to 5 min)") {
-                    if waypoint.contentAudioFile != nil {
+                    if hasContentAudio {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(.green)
@@ -70,7 +78,7 @@ struct WaypointEditorView: View {
                 }
 
                 Section("Direction to Next Stop (up to 15 sec)") {
-                    if waypoint.navAudioFile != nil {
+                    if stop.navAudioFile != nil {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(.green)
@@ -95,14 +103,14 @@ struct WaypointEditorView: View {
                         Text("Lat")
                             .foregroundStyle(.secondary)
                         Spacer()
-                        Text(String(format: "%.5f", waypoint.lat))
+                        Text(String(format: "%.5f", stop.lat))
                             .monospacedDigit()
                     }
                     HStack {
                         Text("Lng")
                             .foregroundStyle(.secondary)
                         Spacer()
-                        Text(String(format: "%.5f", waypoint.lng))
+                        Text(String(format: "%.5f", stop.lng))
                             .monospacedDigit()
                     }
                 }
@@ -113,7 +121,7 @@ struct WaypointEditorView: View {
                     }
                 }
             }
-            .navigationTitle("Stop \(waypoint.order)")
+            .navigationTitle("Stop \(stop.order)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -124,28 +132,34 @@ struct WaypointEditorView: View {
                 RecordingView(
                     title: "Record Story",
                     maxDuration: 300,
-                    targetURL: storage.contentAudioURL(tourId: tourId, waypointId: waypoint.id)
+                    targetURL: storage.contentAudioURL(tourId: tourId, stopId: stop.id)
                 ) { url in
-                    waypoint.contentAudioFile = "content.m4a"
+                    // Update the first segment's audio file
+                    if !stop.segments.isEmpty {
+                        stop.segments[0].audioFile = "content.m4a"
+                    }
                 }
             }
             .sheet(isPresented: $showNavRecorder) {
                 RecordingView(
                     title: "Record Direction",
                     maxDuration: 15,
-                    targetURL: storage.navAudioURL(tourId: tourId, waypointId: waypoint.id)
+                    targetURL: storage.navAudioURL(tourId: tourId, stopId: stop.id)
                 ) { url in
-                    waypoint.navAudioFile = "nav.m4a"
+                    stop.navAudioFile = "nav.m4a"
                 }
             }
         }
     }
 
     private var radiusDescription: String {
-        let r = Int(waypoint.triggerRadiusMeters)
+        let r = Int(stop.triggerRadiusMeters)
         if r <= 20 { return "Very close — about a house width away" }
         if r <= 40 { return "Close — about half a block" }
         if r <= 70 { return "Medium — a comfortable approach distance" }
         return "Wide — starts well before arrival"
     }
 }
+
+// Keep old name as typealias
+typealias WaypointEditorView = StopEditorView

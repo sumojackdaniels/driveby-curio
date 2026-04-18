@@ -1,7 +1,7 @@
 import SwiftUI
 
 // Tour creation — Step 1: metadata (title, creator, tags, mode)
-// Then Step 2: map view to add waypoints
+// Then Step 2: map view to add stops
 
 struct CreateTourView: View {
     @Environment(WalkingTourStore.self) var tourStore
@@ -79,22 +79,26 @@ struct CreateTourView: View {
             }
             .navigationDestination(isPresented: $showMapEditor) {
                 if let tour = tour {
-                    WaypointMapEditorView(tour: tour, onSaved: { dismiss() })
+                    StopMapEditorView(tour: tour, onSaved: { dismiss() })
                 }
             }
         }
     }
 
     private func createTourAndShowMap() {
+        let author = TourAuthor(
+            name: creatorName,
+            role: creatorIsLocal ? "Local guide" : "Guide"
+        )
         let newTour = WalkingTour(
             id: UUID().uuidString,
             title: title,
-            creatorName: creatorName,
-            creatorIsLocal: creatorIsLocal,
+            author: author,
             description: description,
             tags: Array(selectedTags),
             mode: mode,
-            waypoints: [],
+            stops: [],
+            paths: [],
             createdAt: Date(),
             updatedAt: Date(),
             isAuthored: false

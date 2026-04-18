@@ -55,13 +55,13 @@ struct WalkingTourPlaybackView: View {
             Text(tour.title.uppercased())
                 .font(.caption2.weight(.bold))
                 .foregroundStyle(.white.opacity(0.7))
-            if let wp = player.currentWaypoint {
-                Text(wp.title)
+            if let stop = player.currentStop {
+                Text(stop.title)
                     .font(.title3.weight(.bold))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
             }
-            Text("Stop \(player.currentWaypointIndex + 1) of \(tour.waypoints.count)")
+            Text("Stop \(player.currentStopIndex + 1) of \(tour.sortedStops.count)")
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.white.opacity(0.85))
         }
@@ -87,8 +87,8 @@ struct WalkingTourPlaybackView: View {
 
     private var listeningMode: some View {
         VStack(spacing: 20) {
-            if let wp = player.currentWaypoint {
-                // Waypoint info card
+            if let stop = player.currentStop {
+                // Stop info card
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Image(systemName: "headphones")
@@ -98,7 +98,7 @@ struct WalkingTourPlaybackView: View {
                             .foregroundStyle(.green)
                     }
 
-                    Text(wp.description)
+                    Text(stop.description)
                         .font(.body)
                         .foregroundStyle(.secondary)
 
@@ -136,7 +136,7 @@ struct WalkingTourPlaybackView: View {
                 Text("Getting to the next stop...")
                     .font(.headline)
 
-                if let next = player.nextWaypoint {
+                if let next = player.nextStop {
                     Text(next.title)
                         .font(.title3.weight(.bold))
                         .multilineTextAlignment(.center)
@@ -158,7 +158,7 @@ struct WalkingTourPlaybackView: View {
 
     private var compassMode: some View {
         VStack(spacing: 20) {
-            if let next = player.nextWaypoint {
+            if let next = player.nextStop {
                 // Compass arrow
                 VStack(spacing: 8) {
                     CompassArrowView(
@@ -306,7 +306,7 @@ struct CompassArrowView: View {
 
 struct WalkingRouteMapView: UIViewRepresentable {
     let route: MKRoute
-    let destination: WalkingWaypoint
+    let destination: TourStop
 
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
