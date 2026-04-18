@@ -370,9 +370,8 @@ private struct TourFeedCard: View {
     // Map inlay with walk/bike estimates
     private var mapSection: some View {
         VStack(spacing: 0) {
-            // Live map showing tour stops
-            StopPreviewMap(stops: tour.sortedStops)
-                .disabled(true) // non-interactive in feed card
+            // Compact map — small dots, no labels, no attribution
+            CompactStopMap(stops: tour.sortedStops)
                 .frame(maxHeight: .infinity)
 
             // Walk/bike estimates
@@ -461,5 +460,35 @@ private struct TourFeedCard: View {
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 4)
+    }
+}
+
+// MARK: - Compact Stop Map
+//
+// Minimal map for feed card inlays — small dots, no numbers, no
+// Apple Maps logo. Non-interactive.
+
+private struct CompactStopMap: View {
+    let stops: [TourStop]
+
+    var body: some View {
+        Map {
+            ForEach(stops) { stop in
+                Annotation("", coordinate: stop.coordinate) {
+                    Circle()
+                        .fill(.green)
+                        .frame(width: 10, height: 10)
+                }
+            }
+
+            if stops.count >= 2 {
+                let coords = stops.sorted { $0.order < $1.order }.map(\.coordinate)
+                MapPolyline(coordinates: coords)
+                    .stroke(.green.opacity(0.6), lineWidth: 2)
+            }
+        }
+        .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
+        .mapControlVisibility(.hidden)
+        .allowsHitTesting(false)
     }
 }
