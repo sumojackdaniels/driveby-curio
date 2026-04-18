@@ -21,11 +21,20 @@
    - derivedDataPath: /tmp/curio-build
 3. `build_run_sim` — builds, boots simulator, installs, launches
 
-### CarPlay Simulator
+## Design Iteration (SwiftUI Previews)
 
-To test CarPlay: Simulator → I/O → External Displays → CarPlay
+Shared design-iteration workflow. Full docs live in the `core-swift` repo: [`docs/design-workflow/`](https://github.com/sumojackdaniels/core-swift/tree/main/docs/design-workflow). Since core-swift is already resolved as an SPM dependency, these docs are also available locally in Xcode's derived packages (or clone core-swift next to this repo if you want to edit them).
 
-Enable extra options: `defaults write com.apple.iphonesimulator CarPlayExtraOptions -bool YES`
+Read in this order:
+1. [`README.md`](https://github.com/sumojackdaniels/core-swift/blob/main/docs/design-workflow/README.md) — three-tier workflow overview
+2. [`previews-guide.md`](https://github.com/sumojackdaniels/core-swift/blob/main/docs/design-workflow/previews-guide.md) — **conventions every new screen and component must follow**
+3. [`troubleshooting.md`](https://github.com/sumojackdaniels/core-swift/blob/main/docs/design-workflow/troubleshooting.md) — when the canvas spins, crashes, or reports phantom errors
+
+Quick rules (full detail in `previews-guide.md`):
+- **Every new screen** ships `#Preview`, `#Preview("States")`, `#Preview("Dark")`, `#Preview("A11y XL")` at minimum.
+- **Split env-coupled views** into a container (reads `@Environment`) + a presentational `<Name>Content` struct that takes plain values. Preview the `Content`.
+- **Component vs screen:** reusable components have variant previews in their own file; screens have state previews; never duplicate.
+- **Don't reference singletons** (`Service.shared`, `UserDefaults`, `UUID()`, `Date()`) from preview closures — causes non-determinism.
 
 ## TDD Workflow
 
