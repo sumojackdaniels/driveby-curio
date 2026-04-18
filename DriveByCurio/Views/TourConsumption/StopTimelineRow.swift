@@ -8,9 +8,6 @@ import SwiftUI
 // - Stop label with contextual state
 // - Title and blurb
 // - Expandable segment list
-//
-// Standard SwiftUI throughout. The timeline dot + connecting line uses
-// ZStack overlays rather than custom drawing.
 
 struct StopTimelineRow: View {
     let stop: TourStop
@@ -41,9 +38,7 @@ struct StopTimelineRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
-            // Timeline column (dot only — the connecting line is drawn
-            // as a background on the full row so it inherits the row's
-            // height without needing a greedy GeometryReader)
+            // Timeline column (dot only — line drawn via .background)
             ZStack(alignment: .top) {
                 statusDot
                     .offset(y: 6)
@@ -69,6 +64,19 @@ struct StopTimelineRow: View {
                     .lineSpacing(2)
                     .padding(.top, 2)
 
+                // Segment count badge (when more than one segment)
+                if segments.count > 1 && !isExpanded {
+                    HStack(spacing: 4) {
+                        Image(systemName: "waveform")
+                            .font(.system(size: 9))
+                        Text("\(segments.count) segments")
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundStyle(TourTokens.moss)
+                    .padding(.top, 4)
+                }
+
                 // Expanded: segment list
                 if isExpanded {
                     expandedSegments
@@ -77,50 +85,29 @@ struct StopTimelineRow: View {
             }
         }
         .padding(.bottom, 20)
-        // Connecting line drawn as a background on the full row.
-        // This inherits the row's resolved height, avoiding the
-        // unconstrained GeometryReader that caused layout deadlock.
+        // IMPORTANT: Connecting line is drawn as a .background so that
+        // GeometryReader inherits an already-resolved size. Placing
+        // GeometryReader as a direct child of ScrollView > VStack > ForEach
+        // causes a layout negotiation deadlock and blank screens on
+        // NavigationStack push.
         .background(alignment: .topLeading) {
             if !isLast {
-                connectingLine
-                    .padding(.top, 22)
-            }
-        }
-    }
-
-    // MARK: - Connecting Line
-    //
-    // Drawn as a .background on the row body so it inherits the full
-    // resolved row height. This replaces the previous bare GeometryReader
-    // which caused a layout deadlock inside ScrollView > VStack on
-    // NavigationStack push (blank screen until background/foreground).
-
-    @ViewBuilder
-    private var connectingLine: some View {
-        if isTransitFromHere {
-            // Dashed line for in-transit.
-            // The GeometryReader here is safe because it lives inside
-            // an .overlay on a Rectangle that already has its size
-            // resolved from the row background.
-            Rectangle()
-                .fill(.clear)
-                .frame(width: 24)
-                .overlay {
-                    GeometryReader { geo in
+                GeometryReader { geo in
+                    if isTransitFromHere {
                         Path { path in
-                            path.move(to: CGPoint(x: 11.5, y: 0))
+                            path.move(to: CGPoint(x: 11.5, y: 28))
                             path.addLine(to: CGPoint(x: 11.5, y: geo.size.height))
                         }
                         .stroke(TourTokens.ember, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+                    } else {
+                        Rectangle()
+                            .fill(stopState == .done || stopState == .playing || stopState == .arrived ? TourTokens.moss : TourTokens.faint)
+                            .frame(width: 1.5)
+                            .offset(x: 10.75, y: 28)
                     }
                 }
-        } else {
-            // Solid line — no GeometryReader needed, just fill the
-            // available height from the background modifier.
-            Rectangle()
-                .fill(stopState == .done || stopState == .playing || stopState == .arrived ? TourTokens.moss : TourTokens.faint)
-                .frame(width: 1.5)
-                .offset(x: 10.75)
+                .frame(width: 34)
+            }
         }
     }
 
@@ -129,7 +116,6 @@ struct StopTimelineRow: View {
         ZStack {
             switch stopState {
             case .arrived, .playing:
-                // Green pulse
                 Circle()
                     .fill(TourTokens.moss.opacity(0.25))
                     .frame(width: 24, height: 24)
@@ -139,7 +125,6 @@ struct StopTimelineRow: View {
                     .frame(width: 16, height: 16)
 
             case .approaching:
-                // Orange pulse
                 Circle()
                     .fill(TourTokens.ember.opacity(0.25))
                     .frame(width: 24, height: 24)
@@ -149,7 +134,6 @@ struct StopTimelineRow: View {
                     .frame(width: 16, height: 16)
 
             case .done:
-                // Moss with checkmark
                 Circle()
                     .fill(TourTokens.moss)
                     .frame(width: 16, height: 16)
@@ -160,13 +144,11 @@ struct StopTimelineRow: View {
                     )
 
             case .current:
-                // Ink filled
                 Circle()
                     .fill(TourTokens.ink)
                     .frame(width: 16, height: 16)
 
             case .pending:
-                // Empty with border
                 Circle()
                     .fill(Color(.systemBackground))
                     .frame(width: 16, height: 16)
@@ -224,9 +206,6 @@ struct StopTimelineRow: View {
 
 // MARK: - Pulse Animation
 
-/// Looping scale+fade pulse for status dots.
-/// NOTE: Custom modifier — no built-in SwiftUI pulse animation matches the
-/// concentric-ring design from the wireframe.
 private struct PulseAnimation: ViewModifier {
     @State private var isPulsing = false
 

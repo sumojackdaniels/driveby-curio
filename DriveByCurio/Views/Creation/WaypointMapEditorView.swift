@@ -3,28 +3,29 @@ import MapKit
 import UIKit
 import CoreSwift
 
-// Tour creation — Step 2: drop waypoint pins on a map.
+// Tour creation — Step 2: drop stop pins on a map.
 // User walks around, tapping "Add Stop" to drop a pin at their
 // current GPS position. Each pin can be edited with title, trigger
 // radius, and audio recordings.
+//
+// This file keeps the old name WaypointMapEditorView as a typealias
+// but the primary type is now StopMapEditorView.
 
-struct WaypointMapEditorView: View {
+struct StopMapEditorView: View {
     @State var tour: WalkingTour
     var onSaved: (() -> Void)?
     @Environment(WalkingTourStore.self) var tourStore
     @Environment(LocationService.self) var locationService
     @Environment(\.dismiss) var dismiss
 
-    // Start with a real region fallback so the map never shows an infinite spinner.
-    // We re-center on the user once we get a GPS fix.
     @State private var cameraPosition: MapCameraPosition = .userLocation(
         fallback: .region(MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 38.98, longitude: -77.10), // Bethesda default
+            center: CLLocationCoordinate2D(latitude: 38.98, longitude: -77.10),
             span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
         ))
     )
     @State private var hasCenteredOnUser = false
-    @State private var editingWaypointID: String?
+    @State private var editingStopID: String?
     @State private var showSaveConfirmation = false
     @State private var showLocationDeniedAlert = false
     @State private var showNoLocationToast = false
@@ -36,19 +37,19 @@ struct WaypointMapEditorView: View {
             Map(position: $cameraPosition) {
                 UserAnnotation()
 
-                ForEach(tour.stops) { wp in
-                    Annotation(wp.title, coordinate: wp.coordinate) {
-                        WaypointMarker(
-                            number: wp.order,
-                            hasAudio: wp.segments.contains { $0.audioFile != nil }
+                ForEach(tour.stops) { stop in
+                    Annotation(stop.title, coordinate: stop.coordinate) {
+                        StopMarker(
+                            number: stop.order,
+                            hasAudio: stop.segments.contains { $0.audioFile != nil }
                         )
                         .onTapGesture {
-                            editingWaypointID = wp.id
+                            editingStopID = stop.id
                         }
                     }
                 }
 
-                // Draw lines between waypoints
+                // Draw lines between stops
                 if tour.stops.count >= 2 {
                     let coords = tour.stops.sorted { $0.order < $1.order }.map(\.coordinate)
                     MapPolyline(coordinates: coords)
@@ -73,7 +74,7 @@ struct WaypointMapEditorView: View {
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
 
-                // Waypoint count
+                // Stop count
                 if !tour.stops.isEmpty {
                     Text("\(tour.stops.count) stop\(tour.stops.count == 1 ? "" : "s") added")
                         .font(.subheadline.weight(.medium))
@@ -85,7 +86,7 @@ struct WaypointMapEditorView: View {
                 HStack(spacing: 16) {
                     // Add Stop button
                     Button {
-                        addWaypointAtCurrentLocation()
+                        addStopAtCurrentLocation()
                     } label: {
                         Label("Add Stop Here", systemImage: "mappin.and.ellipse")
                             .font(.headline)
@@ -121,18 +122,18 @@ struct WaypointMapEditorView: View {
             requestLocationIfNeeded()
         }
         .sheet(isPresented: Binding(
-            get: { editingWaypointID != nil },
-            set: { if !$0 { editingWaypointID = nil } }
+            get: { editingStopID != nil },
+            set: { if !$0 { editingStopID = nil } }
         )) {
-            if let id = editingWaypointID,
+            if let id = editingStopID,
                let index = tour.stops.firstIndex(where: { $0.id == id }) {
-                WaypointEditorView(
-                    waypoint: $tour.stops[index],
+                StopEditorView(
+                    stop: $tour.stops[index],
                     tourId: tour.id,
                     onDelete: {
                         tour.stops.removeAll { $0.id == id }
-                        reorderWaypoints()
-                        editingWaypointID = nil
+                        reorderStops()
+                        editingStopID = nil
                     }
                 )
             }
@@ -181,12 +182,11 @@ struct WaypointMapEditorView: View {
         }
     }
 
-    private func addWaypointAtCurrentLocation() {
+    private func addStopAtCurrentLocation() {
         guard let location = locationService.currentLocation else {
             #if DEBUG
             if locationService.authorizationStatus == .authorizedWhenInUse
                 || locationService.authorizationStatus == .authorizedAlways {
-                // Location is authorized but no fix yet — likely simulator without simulated location
                 showDebugNoLocationAlert = true
             } else {
                 showNoLocationToast = true
@@ -208,6 +208,17 @@ struct WaypointMapEditorView: View {
         let stopId = UUID().uuidString
         let order = tour.stops.count + 1
 
+        // Create a stop with a single empty narration segment
+        let segment = TourSegment(
+            id: "\(stopId)-narration",
+            kind: .narration,
+            title: "Stop \(order)",
+            description: "",
+            durationSeconds: 60,
+            audioFile: nil,
+            narrationText: nil
+        )
+
         let stop = TourStop(
             id: stopId,
             order: order,
@@ -217,7 +228,7 @@ struct WaypointMapEditorView: View {
             lat: location.coordinate.latitude,
             lng: location.coordinate.longitude,
             triggerRadiusMeters: 30,
-            segments: [],
+            segments: [segment],
             navAudioFile: nil,
             navInstructionText: nil
         )
@@ -225,25 +236,39 @@ struct WaypointMapEditorView: View {
         tour.stops.append(stop)
 
         // Open editor for the new stop
-        editingWaypointID = stop.id
+        editingStopID = stop.id
     }
 
-    private func reorderWaypoints() {
+    private func reorderStops() {
         for i in tour.stops.indices {
             tour.stops[i].order = i + 1
         }
     }
 
     private func saveTour() {
+        // Recompute paths from GPS coordinates before saving
+        let sorted = tour.stops.sorted { $0.order < $1.order }
+        if sorted.count >= 2 {
+            tour.paths = zip(sorted, sorted.dropFirst()).map { from, to in
+                let meters = from.clLocation.distance(from: to.clLocation)
+                let feet = Int(meters * 3.28084)
+                let walkMin = max(1, Int(ceil(Double(feet) / 264.0)))
+                let bikeMin = max(1, Int(ceil(Double(feet) / 880.0)))
+                return TourPath(walkMinutes: walkMin, bikeMinutes: bikeMin, distanceFeet: feet)
+            }
+        }
         tour.updatedAt = Date()
         tourStore.saveUserTour(tour)
         showSaveConfirmation = true
     }
 }
 
-// MARK: - Waypoint Map Marker
+// Keep old name as typealias
+typealias WaypointMapEditorView = StopMapEditorView
 
-struct WaypointMarker: View {
+// MARK: - Stop Map Marker
+
+struct StopMarker: View {
     let number: Int
     let hasAudio: Bool
 
@@ -259,3 +284,6 @@ struct WaypointMarker: View {
         .shadow(radius: 2)
     }
 }
+
+// Keep old name as typealias
+typealias WaypointMarker = StopMarker

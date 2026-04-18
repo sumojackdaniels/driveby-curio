@@ -4,17 +4,6 @@ import SwiftUI
 //
 // Full-screen editorial segment player. Matches wireframe screen 04.
 // Presented as a sheet/fullScreenCover from the tour overview.
-//
-// Layout:
-// - Top bar: dismiss chevron, stop label, spacer
-// - Segment kind + title (serif)
-// - Descriptive quote (serif italic)
-// - Photo cluster (two tiled placeholders)
-// - Waveform progress bar (custom Canvas — see WaveformView.swift)
-// - Elapsed / remaining time
-// - Centered play/pause button
-//
-// Standard SwiftUI used for everything except WaveformView (custom Canvas).
 
 struct SegmentPlayerView: View {
     let tour: WalkingTour
@@ -40,12 +29,12 @@ struct SegmentPlayerView: View {
 
     private var elapsed: TimeInterval {
         if isPlayerActive { return player.audioCurrentTime }
-        return Double(segment.durationMinutes * 60) * progress
+        return Double(segment.durationSeconds) * progress
     }
 
     private var remaining: TimeInterval {
         if isPlayerActive { return max(0, player.audioDuration - player.audioCurrentTime) }
-        return Double(segment.durationMinutes * 60) * (1 - progress)
+        return Double(segment.durationSeconds) * (1 - progress)
     }
 
     var body: some View {

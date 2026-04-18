@@ -7,11 +7,6 @@ import SwiftUI
 //   1. "At a stop" — shows stop title, "You are at {address}", play button
 //   2. "Playing"   — shows tour title eyebrow, segment title, stop info, pause button
 //   3. "Navigate"  — ember background, distance away, "Navigate there" CTA
-//
-// Uses standard SwiftUI:
-// - .ultraThinMaterial for glass blur
-// - Capsule() for the navigate pill
-// - Standard layout with HStack/VStack
 
 struct DockedPlayerBanner: View {
     let tour: WalkingTour

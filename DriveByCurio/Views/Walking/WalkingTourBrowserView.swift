@@ -58,7 +58,7 @@ struct WalkingTourBrowserView: View {
                     NavigationLink(value: activeTour) {
                         DockedPlayerBanner(
                             tour: activeTour,
-                            currentStopIndex: min(player.currentWaypointIndex, activeTour.sortedStops.count - 1),
+                            currentStopIndex: min(player.currentStopIndex, activeTour.sortedStops.count - 1),
                             atStop: !player.hasStarted || (player.playbackMode == .listening && !player.isPlaying)
                         )
                     }
@@ -152,9 +152,6 @@ struct WalkingTourBrowserView: View {
 }
 
 // MARK: - Hero Card
-//
-// Community-forward hero unit matching the wireframe's "Highlighted nearby" treatment.
-// Full-bleed photo with gradient, author chip, quote, walk/bike times, Play pill.
 
 private struct TourHeroCard: View {
     let tour: WalkingTour
@@ -290,9 +287,6 @@ private struct TourHeroCard: View {
 }
 
 // MARK: - Feed Card
-//
-// Split card: 2/3 photo with topic tags + 1/3 map placeholder with walk/bike estimates.
-// Title, author + rating sit below the card — Airbnb-style.
 
 private struct TourFeedCard: View {
     let tour: WalkingTour
@@ -356,7 +350,7 @@ private struct TourFeedCard: View {
             .padding(.bottom, 10)
         }
         .frame(maxWidth: .infinity)
-        .layoutPriority(2) // Takes 2/3 of space
+        .layoutPriority(2)
     }
 
     // Map placeholder with walk/bike estimates
@@ -414,7 +408,7 @@ private struct TourFeedCard: View {
             alignment: .leading
         )
         .frame(maxWidth: .infinity)
-        .layoutPriority(1) // Takes 1/3 of space
+        .layoutPriority(1)
     }
 
     // Title + author + rating below the card
@@ -431,7 +425,7 @@ private struct TourFeedCard: View {
 
                 // Rating (placeholder)
                 HStack(spacing: 3) {
-                    Text("4.\(tour.stops.count)")
+                    Text("4.\(tour.totalStops)")
                         .fontWeight(.medium)
                     Text("⭐️")
                         .font(.caption)

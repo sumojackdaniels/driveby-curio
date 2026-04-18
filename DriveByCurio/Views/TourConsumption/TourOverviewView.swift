@@ -7,16 +7,6 @@ import MapKit
 // a scrollable timeline of stops, and a docked player banner.
 //
 // Corresponds to wireframe screens 01a (at stop), 02 (expanded), 03 (in transit).
-//
-// Standard SwiftUI throughout:
-// - ScrollView for the main content
-// - ZStack overlays for hero image + gradient + text
-// - VStack timeline with StopTimelineRow components
-// - Bottom-pinned DockedPlayerBanner via overlay
-//
-// NOTE: The hero image gradient overlay (dark gradient on top of photo) is the
-// only "non-standard" pattern here — it uses a LinearGradient in an overlay,
-// which is idiomatic SwiftUI but not a built-in component.
 
 struct TourOverviewView: View {
     let tour: WalkingTour
@@ -244,8 +234,7 @@ struct TourOverviewView: View {
     private var stopsTimeline: some View {
         let sortedStops = tour.sortedStops
         let paths = tour.paths
-        let playerStopIndex = isPlayerActive ? player.currentWaypointIndex : -1
-        // Determine in-transit: when player is in compass mode, we're transiting FROM current stop
+        let playerStopIndex = isPlayerActive ? player.currentStopIndex : -1
         let transitFromIndex = isInTransit ? playerStopIndex : -1
 
         return VStack(alignment: .leading, spacing: 0) {
@@ -320,20 +309,20 @@ struct TourOverviewView: View {
         let paths = tour.paths
 
         if isInTransit {
-            let nextIndex = min(player.currentWaypointIndex + 1, sortedStops.count - 1)
+            let nextIndex = min(player.currentStopIndex + 1, sortedStops.count - 1)
             let nextStop = sortedStops[nextIndex]
-            let distanceFeet = player.currentWaypointIndex < paths.count
-                ? paths[player.currentWaypointIndex].distanceFeet
+            let distanceFeet = player.currentStopIndex < paths.count
+                ? paths[player.currentStopIndex].distanceFeet
                 : Int(player.distanceToNextStop * 3.28084)
 
             DockedPlayerBanner(
                 tour: tour,
-                currentStopIndex: player.currentWaypointIndex,
+                currentStopIndex: player.currentStopIndex,
                 navigateAddress: nextStop.address,
                 navigateDistanceFeet: distanceFeet
             )
         } else {
-            let stopIdx = isPlayerActive ? player.currentWaypointIndex : 0
+            let stopIdx = isPlayerActive ? player.currentStopIndex : 0
             DockedPlayerBanner(
                 tour: tour,
                 currentStopIndex: min(stopIdx, sortedStops.count - 1),
@@ -359,9 +348,6 @@ struct TourOverviewView: View {
 }
 
 // MARK: - Elevation Sparkline
-//
-// NOTE: Custom shape — no SwiftUI equivalent for elevation profile visualization.
-// A simple hill curve rendered as a Path.
 
 struct ElevationSparkline: View {
     var body: some View {
