@@ -179,20 +179,18 @@ private struct TourHeroCard: View {
                     HStack(spacing: 6) {
                         // Pulsing dot
                         ZStack {
-                            Circle().fill(.white).frame(width: 4, height: 4)
-                            Circle().fill(.white.opacity(0.5)).frame(width: 8, height: 8)
+                            Circle().fill(.primary).frame(width: 4, height: 4)
+                            Circle().fill(.primary.opacity(0.2)).frame(width: 8, height: 8)
                         }
                         Text("HIGHLIGHTED NEARBY")
                             .font(.caption2)
                             .fontWeight(.semibold)
                             .tracking(0.5)
                     }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(.white.opacity(0.2))
-                    .background(.ultraThinMaterial.opacity(0.4))
-                    .clipShape(Capsule())
+                    .foregroundStyle(.primary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .glassEffect(.regular, in: Capsule())
 
                     Spacer()
                 }
