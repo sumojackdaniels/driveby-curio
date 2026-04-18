@@ -15,25 +15,24 @@ struct WaveformView: View {
     var unplayedColor: Color = TourTokens.faint
     var seed: Int = 7
 
+    // Pre-compute amplitudes so the body stays cheap
+    private var amplitudes: [Double] {
+        (0..<barCount).map { i in
+            let s = sin(Double(i + seed) * 12.9898) * 43758.5453
+            let r = s - floor(s)
+            return 0.25 + 0.75 * abs(sin(Double(i) * 0.4) * 0.5 + r * 0.5)
+        }
+    }
+
     var body: some View {
-        Canvas { context, size in
-            let gap: CGFloat = 2
-            let barWidth = (size.width - gap * CGFloat(barCount - 1)) / CGFloat(barCount)
+        // Pure SwiftUI — avoids Canvas/Metal stall on fullScreenCover presentation
+        HStack(spacing: 2) {
             let playedBars = Int(Double(barCount) * progress)
-
-            for i in 0..<barCount {
-                // Pseudo-random height based on seed
-                let s = sin(Double(i + seed) * 12.9898) * 43758.5453
-                let r = s - floor(s)
-                let amplitude = 0.25 + 0.75 * abs(sin(Double(i) * 0.4) * 0.5 + r * 0.5)
-                let barHeight = size.height * amplitude
-                let x = CGFloat(i) * (barWidth + gap)
-                let y = (size.height - barHeight) / 2
-
-                let rect = CGRect(x: x, y: y, width: barWidth, height: barHeight)
-                let path = Path(roundedRect: rect, cornerRadius: barWidth / 2)
-                let color = i < playedBars ? playedColor : unplayedColor
-                context.fill(path, with: .color(color))
+            ForEach(0..<barCount, id: \.self) { i in
+                RoundedRectangle(cornerRadius: 1.5)
+                    .fill(i < playedBars ? playedColor : unplayedColor)
+                    .frame(maxWidth: .infinity)
+                    .scaleEffect(y: amplitudes[i], anchor: .center)
             }
         }
     }
