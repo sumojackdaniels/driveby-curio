@@ -371,13 +371,9 @@ private struct TourFeedCard: View {
     // Map inlay with walk/bike estimates
     private var mapSection: some View {
         VStack(spacing: 0) {
-            // Compact map — small dots, no labels
-            // Extra 20pt height + negative bottom padding clips the
-            // Apple Maps logo and "Legal" link off the visible area.
+            // Static map snapshot — no UI overlays, performant
             CompactStopMap(stops: tour.sortedStops)
                 .frame(maxHeight: .infinity)
-                .padding(.bottom, -20)
-                .clipped()
 
             // Walk/bike estimates
             Divider()
@@ -470,96 +466,93 @@ private struct TourFeedCard: View {
 
 // MARK: - Compact Stop Map
 //
-// Minimal UIKit map for feed card inlays — small green dots, no
-// labels, no "Maps" logo, no "Legal" link. Non-interactive.
-// Uses MKMapView directly for full control over attribution visibility.
+// Static map snapshot for feed card inlays. Uses MKMapSnapshotter
+// to render a clean image with no UI overlays (no logo, no Legal).
+// Dots and polyline are drawn onto the snapshot image directly.
+// Much more performant than embedding MKMapView per cell.
 
-private struct CompactStopMap: UIViewRepresentable {
+private struct CompactStopMap: View {
     let stops: [TourStop]
+    @State private var snapshot: UIImage?
 
-    func makeUIView(context: Context) -> MKMapView {
-        let map = MKMapView()
-        map.isUserInteractionEnabled = false
-        map.showsUserLocation = false
-        map.mapType = .standard
-        map.pointOfInterestFilter = .excludingAll
-        // Hide "Maps" logo and "Legal" link
-        map.showsCompass = false
-        map.showsScale = false
-        // Attribution (Maps logo + Legal) is hidden by the SwiftUI
-        // wrapper clipping the bottom 20pt off the map view.
-        return map
-    }
-
-    func updateUIView(_ map: MKMapView, context: Context) {
-        map.removeOverlays(map.overlays)
-        map.removeAnnotations(map.annotations)
-
-        guard !stops.isEmpty else { return }
-
-        let sorted = stops.sorted { $0.order < $1.order }
-
-        // Add dot annotations
-        for stop in sorted {
-            let annotation = MKPointAnnotation()
-            annotation.coordinate = stop.coordinate
-            map.addAnnotation(annotation)
+    private var region: MKCoordinateRegion {
+        guard !stops.isEmpty else {
+            return MKCoordinateRegion()
         }
-
-        // Add polyline
-        if sorted.count >= 2 {
-            let coords = sorted.map(\.coordinate)
-            let polyline = MKPolyline(coordinates: coords, count: coords.count)
-            map.addOverlay(polyline)
-        }
-
-        // Fit to bounding region with padding
-        let lats = sorted.map(\.lat)
-        let lngs = sorted.map(\.lng)
+        let lats = stops.map(\.lat)
+        let lngs = stops.map(\.lng)
         let center = CLLocationCoordinate2D(
             latitude: (lats.min()! + lats.max()!) / 2,
             longitude: (lngs.min()! + lngs.max()!) / 2
         )
         let span = MKCoordinateSpan(
-            latitudeDelta: (lats.max()! - lats.min()!) * 1.6 + 0.002,
-            longitudeDelta: (lngs.max()! - lngs.min()!) * 1.6 + 0.002
+            latitudeDelta: (lats.max()! - lats.min()!) * 1.8 + 0.003,
+            longitudeDelta: (lngs.max()! - lngs.min()!) * 1.8 + 0.003
         )
-        map.setRegion(MKCoordinateRegion(center: center, span: span), animated: false)
-
-        // Set delegate for rendering
-        map.delegate = context.coordinator
+        return MKCoordinateRegion(center: center, span: span)
     }
 
-    func makeCoordinator() -> Coordinator { Coordinator() }
-
-    class Coordinator: NSObject, MKMapViewDelegate {
-        func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-            guard !(annotation is MKUserLocation) else { return nil }
-            let id = "stop-dot"
-            let view = mapView.dequeueReusableAnnotationView(withIdentifier: id)
-                ?? MKAnnotationView(annotation: annotation, reuseIdentifier: id)
-            view.annotation = annotation
-            view.canShowCallout = false
-
-            let dot = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 10))
-            dot.backgroundColor = UIColor.systemGreen
-            dot.layer.cornerRadius = 5
-
-            view.subviews.forEach { $0.removeFromSuperview() }
-            view.addSubview(dot)
-            view.frame = dot.frame
-            view.centerOffset = .zero
-            return view
-        }
-
-        func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-            if let polyline = overlay as? MKPolyline {
-                let renderer = MKPolylineRenderer(polyline: polyline)
-                renderer.strokeColor = UIColor.systemGreen.withAlphaComponent(0.6)
-                renderer.lineWidth = 2
-                return renderer
+    var body: some View {
+        Group {
+            if let snapshot {
+                Image(uiImage: snapshot)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } else {
+                Color(.systemGray6)
             }
-            return MKOverlayRenderer(overlay: overlay)
+        }
+        .task(id: stops.map(\.id).joined()) {
+            await generateSnapshot()
+        }
+    }
+
+    @MainActor
+    private func generateSnapshot() async {
+        let size = CGSize(width: 200, height: 200)
+        let options = MKMapSnapshotter.Options()
+        options.region = region
+        options.size = size
+        options.pointOfInterestFilter = .excludingAll
+
+        let snapshotter = MKMapSnapshotter(options: options)
+        guard let result = try? await snapshotter.start() else { return }
+
+        let image = result.snapshot.image
+        let sorted = stops.sorted { $0.order < $1.order }
+
+        // Draw dots and polyline onto the snapshot
+        let renderer = UIGraphicsImageRenderer(size: size)
+        snapshot = renderer.image { ctx in
+            image.draw(at: .zero)
+
+            let gc = ctx.cgContext
+
+            // Polyline
+            if sorted.count >= 2 {
+                gc.setStrokeColor(UIColor.systemGreen.withAlphaComponent(0.6).cgColor)
+                gc.setLineWidth(2)
+                gc.setLineCap(.round)
+                gc.setLineJoin(.round)
+                let points = sorted.map { result.snapshot.point(for: $0.coordinate) }
+                gc.move(to: points[0])
+                for pt in points.dropFirst() { gc.addLine(to: pt) }
+                gc.strokePath()
+            }
+
+            // Dots
+            gc.setFillColor(UIColor.systemGreen.cgColor)
+            for stop in sorted {
+                let pt = result.snapshot.point(for: stop.coordinate)
+                let dotSize: CGFloat = 8
+                let rect = CGRect(
+                    x: pt.x - dotSize / 2,
+                    y: pt.y - dotSize / 2,
+                    width: dotSize,
+                    height: dotSize
+                )
+                gc.fillEllipse(in: rect)
+            }
         }
     }
 }
