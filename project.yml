@@ -19,7 +19,7 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     TARGETED_DEVICE_FAMILY: "1,2"
-    SUPPORTS_ROTATION: true
+    SUPPORTS_ROTATION: false
 
 targets:
   DriveByCurio:
@@ -56,6 +56,8 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UIRequiresFullScreen: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
 
   DriveByCurioTests:
     type: bundle.unit-test

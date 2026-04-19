@@ -13,6 +13,7 @@ import CoreSwift
 struct WalkingTourBrowserView: View {
     @Environment(WalkingTourStore.self) var tourStore
     @Environment(WalkingTourPlayer.self) var player
+    @Binding var path: [WalkingTour]
     @State private var showCreateTour = false
 
     private var allTours: [WalkingTour] {
@@ -28,44 +29,30 @@ struct WalkingTourBrowserView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack(alignment: .bottom) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        // Top nav: "Tours" + avatar
-                        topNav
+        NavigationStack(path: $path) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Top nav: "Tours" + avatar
+                    topNav
 
-                        // Hero unit
-                        if let hero = heroTour {
-                            NavigationLink(value: hero) {
-                                TourHeroCard(tour: hero)
-                            }
-                            .buttonStyle(.plain)
+                    // Hero unit
+                    if let hero = heroTour {
+                        NavigationLink(value: hero) {
+                            TourHeroCard(tour: hero)
                         }
-
-                        // Feed section
-                        if !feedTours.isEmpty {
-                            feedSection
-                        }
-
-                        // Bottom padding for banner
-                        Spacer().frame(height: player.activeTour != nil ? 120 : 40)
+                        .buttonStyle(.plain)
                     }
-                }
-                .background(Color(.systemGroupedBackground))
 
-                // Docked playing banner
-                if let activeTour = player.activeTour {
-                    NavigationLink(value: activeTour) {
-                        DockedPlayerBanner(
-                            tour: activeTour,
-                            currentStopIndex: min(player.currentStopIndex, activeTour.sortedStops.count - 1),
-                            atStop: !player.hasStarted || (player.playbackMode == .listening && !player.isPlaying)
-                        )
+                    // Feed section
+                    if !feedTours.isEmpty {
+                        feedSection
                     }
-                    .buttonStyle(.plain)
+
+                    // Bottom padding for the root-level docked banner
+                    Spacer().frame(height: player.activeTour != nil ? 120 : 40)
                 }
             }
+            .background(Color(.systemGroupedBackground))
             .toolbarVisibility(.hidden, for: .navigationBar)
             .navigationDestination(for: WalkingTour.self) { tour in
                 TourOverviewView(tour: tour)
@@ -327,7 +314,7 @@ private struct TourFeedCard: View {
         }
     }
 
-    // Photo with topic tags overlay
+    // Photo with hero-style walk/bike badges overlay
     private var photoSection: some View {
         ZStack(alignment: .bottom) {
             PhotoPlaceholder(
@@ -337,7 +324,7 @@ private struct TourFeedCard: View {
                 imageName: tour.coverImageName
             )
 
-            // Bottom gradient for tag legibility
+            // Bottom gradient for badge legibility
             LinearGradient(
                 stops: [
                     .init(color: .clear, location: 0.55),
@@ -347,20 +334,10 @@ private struct TourFeedCard: View {
                 endPoint: .bottom
             )
 
-            // Topic tags
-            HStack(spacing: 6) {
-                ForEach(tour.tags.prefix(3), id: \.self) { tag in
-                    Text(tag.capitalized)
-                        .font(.caption2)
-                        .fontWeight(.semibold)
-                        .tracking(0.1)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(.white.opacity(0.22))
-                        .background(.ultraThinMaterial.opacity(0.3))
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
-                }
+            // Walk/bike badges — styled like the hero meta pills
+            HStack(spacing: 8) {
+                metaBadge(icon: "figure.walk", text: "\(walkMinutes)m")
+                metaBadge(icon: "bicycle", text: "\(bikeMinutes)m")
                 Spacer()
             }
             .padding(.horizontal, 12)
@@ -368,71 +345,56 @@ private struct TourFeedCard: View {
         }
     }
 
-    // Map inlay with walk/bike estimates
-    private var mapSection: some View {
-        VStack(spacing: 0) {
-            // Static map snapshot — no UI overlays, performant
-            CompactStopMap(stops: tour.sortedStops)
-                .frame(maxHeight: .infinity)
-
-            // Walk/bike estimates
-            Divider()
-            HStack(spacing: 0) {
-                // Walk
-                HStack(spacing: 4) {
-                    Image(systemName: "figure.walk")
-                        .font(.system(size: 9))
-                    Text("\(walkMinutes)m")
-                        .font(.caption2)
-                        .fontWeight(.medium)
-                }
-                .frame(maxWidth: .infinity)
-                .foregroundStyle(TourTokens.ink2)
-
-                Divider().frame(height: 14)
-
-                // Bike
-                HStack(spacing: 4) {
-                    Image(systemName: "bicycle")
-                        .font(.system(size: 9))
-                    Text("\(bikeMinutes)m")
-                        .font(.caption2)
-                        .fontWeight(.medium)
-                }
-                .frame(maxWidth: .infinity)
-                .foregroundStyle(TourTokens.ink2)
-            }
-            .padding(.vertical, 6)
+    private func metaBadge(icon: String, text: String) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon)
+                .font(.system(size: 10))
+            Text(text)
+                .font(.caption2)
+                .fontWeight(.semibold)
         }
-        .background(Color(.systemBackground))
-        .overlay(alignment: .leading) {
-            Rectangle()
-                .fill(TourTokens.hairline)
-                .frame(width: 0.5)
-                .frame(maxHeight: .infinity)
-        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 9)
+        .padding(.vertical, 4)
+        .background(.ultraThinMaterial.opacity(0.6), in: Capsule())
+        .overlay(Capsule().stroke(.white.opacity(0.2), lineWidth: 0.5))
     }
 
-    // Title + author + rating below the card
+    // Map inlay (no walk/bike row — moved to photo badges)
+    private var mapSection: some View {
+        CompactStopMap(stops: tour.sortedStops)
+            .background(Color(.systemBackground))
+            .overlay(alignment: .leading) {
+                Rectangle()
+                    .fill(TourTokens.hairline)
+                    .frame(width: 0.5)
+                    .frame(maxHeight: .infinity)
+            }
+    }
+
+    // Title + author below the card, with tags replacing the former rating slot
     private var textSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            // Title + rating
-            HStack(alignment: .firstTextBaseline) {
+            // Title + tag chips (tags replace the former rating)
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(tour.title)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .lineLimit(1)
 
-                Spacer()
+                Spacer(minLength: 8)
 
-                // Rating (placeholder)
-                HStack(spacing: 3) {
-                    Text("4.\(tour.totalStops)")
-                        .fontWeight(.medium)
-                    Text("⭐️")
-                        .font(.caption)
+                HStack(spacing: 4) {
+                    ForEach(tour.tags.prefix(2), id: \.self) { tag in
+                        Text(tag.capitalized)
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                            .foregroundStyle(TourTokens.ink2)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 2)
+                            .background(Color(.tertiarySystemFill), in: Capsule())
+                    }
                 }
-                .font(.subheadline)
             }
 
             // Author

@@ -14,64 +14,38 @@ struct TourOverviewView: View {
     @Environment(\.dismiss) var dismiss
 
     // Tour state
-    @State private var currentStopIndex: Int = 0
     @State private var expandedStopIndex: Int? = nil
-    @State private var selectedSegment: TourSegment?  // non-nil triggers fullScreenCover
-    @State private var selectedStopIndex: Int = 0
 
     // Derived state
     private var isPlayerActive: Bool { player.activeTour?.id == tour.id }
-    private var isAtStop: Bool { isPlayerActive && (player.playbackMode == .listening || !player.hasStarted) }
-    private var isInTransit: Bool { isPlayerActive && player.playbackMode == .compass }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // Main scrollable content
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    // Hero — only this section extends into the top safe area
-                    heroSection
-                        .ignoresSafeArea(edges: .top)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                // Hero — only this section extends into the top safe area
+                heroSection
+                    .ignoresSafeArea(edges: .top)
 
-                    // Author
-                    authorSection
+                // Author
+                authorSection
 
-                    // Quote
-                    quoteSection
+                // Quote
+                quoteSection
 
-                    // Route header
-                    routeHeader
+                // Route header
+                routeHeader
 
-                    // Stops timeline
-                    stopsTimeline
+                // Stops timeline
+                stopsTimeline
 
-                    // Bottom padding for docked banner
-                    Spacer()
-                        .frame(height: 120)
-                }
+                // Bottom padding for the root-level docked banner
+                Spacer()
+                    .frame(height: 120)
             }
-
-            // Docked banner
-            dockedBanner
         }
-        // Do NOT apply .ignoresSafeArea to this ZStack — it causes a
-        // layout deadlock on NavigationStack push (view collapses to zero
-        // height until a background/foreground cycle forces re-layout).
-        // Instead, .ignoresSafeArea is scoped to heroSection only.
+        // Do NOT apply .ignoresSafeArea to the outer scroll view — it causes
+        // a layout deadlock on NavigationStack push. Scope it to heroSection.
         .toolbarVisibility(.hidden, for: .navigationBar)
-        // Use item: overload — guarantees segment is non-nil when the
-        // cover presents. The isPresented: + if-let pattern can race.
-        .fullScreenCover(item: $selectedSegment) { segment in
-            SegmentPlayerView(
-                tour: tour,
-                stopIndex: selectedStopIndex,
-                segment: segment,
-                progress: isPlayerActive ? player.audioCurrentTime / max(1, player.audioDuration) : 0
-            )
-            // fullScreenCover creates a separate presentation tree —
-            // @Environment objects from the parent are NOT inherited.
-            .environment(player)
-        }
     }
 
     // MARK: - Hero Section
@@ -97,20 +71,24 @@ struct TourOverviewView: View {
                 endPoint: .bottom
             )
 
-            // Content overlay — pinned to bottom-leading
-            VStack(alignment: .leading, spacing: 0) {
-                // Title
-                Text(tour.title)
-                    .font(.system(size: 28, weight: .regular, design: .serif))
-                    .foregroundStyle(.white)
-                    .lineSpacing(2)
-                    .multilineTextAlignment(.leading)
+            // Content overlay — title/meta column on the left, Play button
+            // in its own column on the right, both bottom-aligned so the
+            // Play button sits flush with the bottom of the hero image.
+            HStack(alignment: .bottom, spacing: 12) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(tour.title)
+                        .font(.system(size: 28, weight: .regular, design: .serif))
+                        .foregroundStyle(.white)
+                        .lineSpacing(2)
+                        .multilineTextAlignment(.leading)
 
-                // Meta line: walk · bike · distance
-                metaLine
-                    .padding(.top, 12)
+                    metaLine
+                        .padding(.top, 12)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                heroPlayButton
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
             .padding(.bottom, 18)
 
@@ -141,6 +119,59 @@ struct TourOverviewView: View {
                 )
         }
         .accessibilityLabel("Back")
+    }
+
+    // MARK: - Hero Play Button
+    //
+    // Starts this tour if it isn't already active. If the user taps it
+    // while a different tour is playing, WalkingTourPlayer.startTour will
+    // snapshot the outgoing tour's progress before switching. When this
+    // tour is the active one, the button toggles play/pause.
+
+    private var isThisTourPlaying: Bool {
+        isPlayerActive && player.hasStarted
+    }
+
+    private var heroPlayButton: some View {
+        Button {
+            if isThisTourPlaying {
+                player.togglePlayPause()
+            } else {
+                player.startTour(tour)
+            }
+        } label: {
+            Circle()
+                .fill(.white)
+                .frame(width: 56, height: 56)
+                .overlay(
+                    Image(systemName: heroPlayIconName)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(.black)
+                        // Nudge the play triangle a hair right so it reads
+                        // as visually centered inside the circle.
+                        .offset(x: isThisTourPlaying && player.isPlaying ? 0 : 2)
+                )
+                .shadow(color: .black.opacity(0.25), radius: 6, y: 2)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(heroPlayAccessibilityLabel)
+    }
+
+    private var heroPlayIconName: String {
+        if isThisTourPlaying && player.isPlaying {
+            return "pause.fill"
+        }
+        return "play.fill"
+    }
+
+    private var heroPlayAccessibilityLabel: String {
+        if isThisTourPlaying && player.isPlaying {
+            return "Pause tour"
+        }
+        if isThisTourPlaying {
+            return "Resume tour"
+        }
+        return "Start tour"
     }
 
     private var metaLine: some View {
@@ -242,6 +273,7 @@ struct TourOverviewView: View {
         let sortedStops = tour.sortedStops
         let paths = tour.paths
         let playerStopIndex = isPlayerActive ? player.currentStopIndex : -1
+        let isInTransit = isPlayerActive && player.playbackMode == .compass
         let transitFromIndex = isInTransit ? playerStopIndex : -1
 
         return VStack(alignment: .leading, spacing: 0) {
@@ -285,71 +317,17 @@ struct TourOverviewView: View {
         playerStopIndex: Int,
         transitFromIndex: Int
     ) -> StopTimelineRow.StopState {
-        guard isPlayerActive else {
-            return index == 0 ? .current : .pending
-        }
-
-        if transitFromIndex >= 0 {
-            if index <= transitFromIndex { return .done }
-            if index == transitFromIndex + 1 { return .approaching }
-            return .pending
-        }
-
-        if index < playerStopIndex { return .done }
-        if index == playerStopIndex {
-            if player.playbackMode == .listening && player.isPlaying {
-                return .playing
-            }
-            if !player.hasStarted || player.playbackMode == .listening {
-                return .arrived
-            }
-            return .current
-        }
-        return .pending
+        StopTimelineRow.StopState.resolve(
+            index: index,
+            isPlayerActive: isPlayerActive,
+            playerStopIndex: playerStopIndex,
+            transitFromIndex: transitFromIndex,
+            playbackMode: player.playbackMode,
+            isPlaying: player.isPlaying,
+            hasStarted: player.hasStarted
+        )
     }
 
-    // MARK: - Docked Banner
-
-    @ViewBuilder
-    private var dockedBanner: some View {
-        let sortedStops = tour.sortedStops
-        let paths = tour.paths
-
-        if sortedStops.isEmpty {
-            EmptyView()
-        } else if isInTransit {
-            let nextIndex = min(player.currentStopIndex + 1, sortedStops.count - 1)
-            let nextStop = sortedStops[nextIndex]
-            let distanceFeet = player.currentStopIndex < paths.count
-                ? paths[player.currentStopIndex].distanceFeet
-                : Int(player.distanceToNextStop * 3.28084)
-
-            DockedPlayerBanner(
-                tour: tour,
-                currentStopIndex: player.currentStopIndex,
-                navigateAddress: nextStop.address,
-                navigateDistanceFeet: distanceFeet
-            )
-        } else {
-            let stopIdx = min(isPlayerActive ? player.currentStopIndex : 0, sortedStops.count - 1)
-            DockedPlayerBanner(
-                tour: tour,
-                currentStopIndex: stopIdx,
-                atStop: !isPlayerActive || !player.hasStarted || (isPlayerActive && player.playbackMode == .listening && !player.isPlaying)
-            )
-            .onTapGesture {
-                if isPlayerActive && player.isPlaying {
-                    let segments = sortedStops[stopIdx].segments
-                    if !segments.isEmpty {
-                        selectedStopIndex = stopIdx
-                        selectedSegment = segments[0]
-                    }
-                } else if !isPlayerActive {
-                    player.startTour(tour)
-                }
-            }
-        }
-    }
 }
 
 // MARK: - Elevation Sparkline

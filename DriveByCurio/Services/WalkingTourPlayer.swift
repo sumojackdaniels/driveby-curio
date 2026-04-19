@@ -36,6 +36,7 @@ final class WalkingTourPlayer: NSObject {
 
     private(set) var activeTour: WalkingTour?
     private(set) var currentStopIndex: Int = 0
+    private(set) var currentSegmentIndex: Int = 0
     private(set) var isPlaying: Bool = false
     private(set) var hasStarted: Bool = false
     private(set) var playbackMode: WalkingPlaybackMode = .listening
@@ -77,6 +78,7 @@ final class WalkingTourPlayer: NSObject {
 
     private let locationService: LocationService
     private let storage = TourStorageService.shared
+    private let progressStore = TourProgressStore.shared
     private let player = AVPlayer()
     private let locationManager = CLLocationManager()
     private var sessionActivated = false
@@ -96,8 +98,15 @@ final class WalkingTourPlayer: NSObject {
     // MARK: - Tour lifecycle
 
     func startTour(_ tour: WalkingTour) {
+        // If we're switching to a different tour mid-play, save the
+        // outgoing tour's progress for later resumption.
+        if let existing = activeTour, existing.id != tour.id {
+            saveCurrentProgress()
+        }
+
         activeTour = tour
         currentStopIndex = 0
+        currentSegmentIndex = 0
         hasStarted = true
         playbackMode = .listening
 
@@ -108,12 +117,27 @@ final class WalkingTourPlayer: NSObject {
         playContentAudio()
     }
 
+    /// Snapshot the currently-active tour's playback state into the
+    /// progress store. No-op if no tour is active.
+    func saveCurrentProgress() {
+        guard let tour = activeTour else { return }
+        let snapshot = TourProgress(
+            tourId: tour.id,
+            stopIndex: currentStopIndex,
+            segmentIndex: currentSegmentIndex,
+            audioTime: audioCurrentTime,
+            savedAt: Date()
+        )
+        progressStore.save(snapshot)
+    }
+
     func endTour() {
         player.pause()
         player.replaceCurrentItem(with: nil)
         removePlayerEndObserver()
         activeTour = nil
         currentStopIndex = 0
+        currentSegmentIndex = 0
         isPlaying = false
         hasStarted = false
         playbackMode = .listening
@@ -138,6 +162,17 @@ final class WalkingTourPlayer: NSObject {
 
     func manualAdvance() {
         advanceToNextStop()
+    }
+
+    /// Seek the current audio item to the given absolute time in seconds.
+    /// No-op if no item is loaded or the duration is unknown.
+    func seek(to seconds: TimeInterval) {
+        guard audioDuration > 0 else { return }
+        let clamped = min(max(seconds, 0), audioDuration)
+        let target = CMTime(seconds: clamped, preferredTimescale: 600)
+        player.seek(to: target, toleranceBefore: .zero, toleranceAfter: .zero)
+        audioCurrentTime = clamped
+        updateNowPlayingPlaybackState()
     }
 
     // MARK: - Playback state machine
@@ -193,6 +228,7 @@ final class WalkingTourPlayer: NSObject {
             return
         }
         currentStopIndex = next
+        currentSegmentIndex = 0
         walkingRoute = nil
         playContentAudio()
     }
