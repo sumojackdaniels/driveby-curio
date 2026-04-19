@@ -6,10 +6,14 @@ import SwiftUI
 //
 // Owns:
 //   - the navigation path binding, so we know whether the user is on the
-//     browser (path empty) or inside a tour overview (path has a tour),
-//     and we can push when the banner is tapped from the browser;
-//   - the segment-player fullScreenCover state, so the banner can open the
-//     full-screen player from either context.
+//     browser (path empty) or inside a tour overview (path has a tour);
+//   - the segment-player fullScreenCover state, so the banner can open
+//     the full-screen player from the active tour's overview.
+//
+// The banner is only shown when a tour is actively playing. Before
+// playback starts, users tap the Play button on TourOverviewView (next
+// to the tour title) to begin — that starts the tour and makes the
+// banner appear at the root level.
 
 struct ContentView: View {
     @Environment(WalkingTourPlayer.self) var player
@@ -24,12 +28,12 @@ struct ContentView: View {
             dockedBanner
         }
         .fullScreenCover(item: $selectedSegment) { segment in
-            if let tour = bannerTour {
+            if let tour = player.activeTour {
                 SegmentPlayerView(
                     tour: tour,
                     stopIndex: selectedStopIndex,
                     segment: segment,
-                    progress: bannerIsActivePlayer && player.audioDuration > 0
+                    progress: player.audioDuration > 0
                         ? player.audioCurrentTime / player.audioDuration
                         : 0
                 )
@@ -42,30 +46,16 @@ struct ContentView: View {
 
     // MARK: - Docked Banner
 
-    /// Which tour should the banner represent?
-    /// - If the user is viewing a tour overview (path has an entry), use that
-    ///   tour — the banner acts as the "start tour" affordance on the overview
-    ///   even before playback begins.
-    /// - Otherwise, use the active tour (the banner trails behind the user
-    ///   while they browse other tours).
-    private var bannerTour: WalkingTour? {
-        path.last ?? player.activeTour
-    }
-
-    /// Whether the banner is representing the actively-playing tour, vs a
-    /// tour the user is just viewing. Controls which state + callbacks apply.
-    private var bannerIsActivePlayer: Bool {
-        guard let bt = bannerTour else { return false }
-        return player.activeTour?.id == bt.id && player.hasStarted
-    }
-
     @ViewBuilder
     private var dockedBanner: some View {
-        if let tour = bannerTour {
+        // Only show when a tour is actively playing. Switching to another
+        // tour's overview does NOT change the banner — it keeps showing
+        // the playing tour until the user taps Play on the new one.
+        if let tour = player.activeTour, player.hasStarted {
             let sortedStops = tour.sortedStops
             if !sortedStops.isEmpty {
-                let stopIdx = min(max(0, bannerIsActivePlayer ? player.currentStopIndex : 0), sortedStops.count - 1)
-                let isInTransit = bannerIsActivePlayer && player.playbackMode == .compass
+                let stopIdx = min(max(0, player.currentStopIndex), sortedStops.count - 1)
+                let isInTransit = player.playbackMode == .compass
 
                 if isInTransit {
                     let paths = tour.paths
@@ -83,15 +73,14 @@ struct ContentView: View {
                         navigateDistanceFeet: distanceFeet
                     )
                 } else {
-                    let atStop = !bannerIsActivePlayer
-                        || (player.playbackMode == .listening && !player.isPlaying)
+                    let atStop = player.playbackMode == .listening && !player.isPlaying
 
                     DockedPlayerBanner(
                         tour: tour,
                         currentStopIndex: stopIdx,
                         atStop: atStop,
                         onBannerTap: { handleBannerTap(tour: tour, stopIdx: stopIdx) },
-                        onPlayPauseTap: { handlePlayPauseTap(tour: tour) }
+                        onPlayPauseTap: { player.togglePlayPause() }
                     )
                 }
             }
@@ -99,24 +88,17 @@ struct ContentView: View {
     }
 
     private func handleBannerTap(tour: WalkingTour, stopIdx: Int) {
-        if path.isEmpty {
-            // On browser — push the tour overview.
-            path.append(tour)
-        } else {
-            // Already inside a tour overview — open the segment player.
+        if path.last?.id == tour.id {
+            // Already on the active tour's overview — open the segment player.
             let stop = tour.sortedStops[stopIdx]
             if let first = stop.segments.first {
                 selectedStopIndex = stopIdx
                 selectedSegment = first
             }
-        }
-    }
-
-    private func handlePlayPauseTap(tour: WalkingTour) {
-        if player.activeTour?.id != tour.id || !player.hasStarted {
-            player.startTour(tour)
         } else {
-            player.togglePlayPause()
+            // User is elsewhere (browser or a different tour's overview) —
+            // jump to the playing tour's overview.
+            path = [tour]
         }
     }
 }

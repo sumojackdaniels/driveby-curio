@@ -73,12 +73,17 @@ struct TourOverviewView: View {
 
             // Content overlay — pinned to bottom-leading
             VStack(alignment: .leading, spacing: 0) {
-                // Title
-                Text(tour.title)
-                    .font(.system(size: 28, weight: .regular, design: .serif))
-                    .foregroundStyle(.white)
-                    .lineSpacing(2)
-                    .multilineTextAlignment(.leading)
+                // Title + Play button
+                HStack(alignment: .center, spacing: 12) {
+                    Text(tour.title)
+                        .font(.system(size: 28, weight: .regular, design: .serif))
+                        .foregroundStyle(.white)
+                        .lineSpacing(2)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    heroPlayButton
+                }
 
                 // Meta line: walk · bike · distance
                 metaLine
@@ -115,6 +120,59 @@ struct TourOverviewView: View {
                 )
         }
         .accessibilityLabel("Back")
+    }
+
+    // MARK: - Hero Play Button
+    //
+    // Starts this tour if it isn't already active. If the user taps it
+    // while a different tour is playing, WalkingTourPlayer.startTour will
+    // snapshot the outgoing tour's progress before switching. When this
+    // tour is the active one, the button toggles play/pause.
+
+    private var isThisTourPlaying: Bool {
+        isPlayerActive && player.hasStarted
+    }
+
+    private var heroPlayButton: some View {
+        Button {
+            if isThisTourPlaying {
+                player.togglePlayPause()
+            } else {
+                player.startTour(tour)
+            }
+        } label: {
+            Circle()
+                .fill(.white)
+                .frame(width: 56, height: 56)
+                .overlay(
+                    Image(systemName: heroPlayIconName)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(.black)
+                        // Nudge the play triangle a hair right so it reads
+                        // as visually centered inside the circle.
+                        .offset(x: isThisTourPlaying && player.isPlaying ? 0 : 2)
+                )
+                .shadow(color: .black.opacity(0.25), radius: 6, y: 2)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(heroPlayAccessibilityLabel)
+    }
+
+    private var heroPlayIconName: String {
+        if isThisTourPlaying && player.isPlaying {
+            return "pause.fill"
+        }
+        return "play.fill"
+    }
+
+    private var heroPlayAccessibilityLabel: String {
+        if isThisTourPlaying && player.isPlaying {
+            return "Pause tour"
+        }
+        if isThisTourPlaying {
+            return "Resume tour"
+        }
+        return "Start tour"
     }
 
     private var metaLine: some View {
