@@ -24,12 +24,12 @@ struct ContentView: View {
             dockedBanner
         }
         .fullScreenCover(item: $selectedSegment) { segment in
-            if let tour = player.activeTour {
+            if let tour = bannerTour {
                 SegmentPlayerView(
                     tour: tour,
                     stopIndex: selectedStopIndex,
                     segment: segment,
-                    progress: player.audioDuration > 0
+                    progress: bannerIsActivePlayer && player.audioDuration > 0
                         ? player.audioCurrentTime / player.audioDuration
                         : 0
                 )
@@ -42,16 +42,33 @@ struct ContentView: View {
 
     // MARK: - Docked Banner
 
+    /// Which tour should the banner represent?
+    /// - If the user is viewing a tour overview (path has an entry), use that
+    ///   tour — the banner acts as the "start tour" affordance on the overview
+    ///   even before playback begins.
+    /// - Otherwise, use the active tour (the banner trails behind the user
+    ///   while they browse other tours).
+    private var bannerTour: WalkingTour? {
+        path.last ?? player.activeTour
+    }
+
+    /// Whether the banner is representing the actively-playing tour, vs a
+    /// tour the user is just viewing. Controls which state + callbacks apply.
+    private var bannerIsActivePlayer: Bool {
+        guard let bt = bannerTour else { return false }
+        return player.activeTour?.id == bt.id && player.hasStarted
+    }
+
     @ViewBuilder
     private var dockedBanner: some View {
-        if let activeTour = player.activeTour {
-            let sortedStops = activeTour.sortedStops
+        if let tour = bannerTour {
+            let sortedStops = tour.sortedStops
             if !sortedStops.isEmpty {
-                let stopIdx = min(max(0, player.currentStopIndex), sortedStops.count - 1)
-                let paths = activeTour.paths
-                let isInTransit = player.playbackMode == .compass
+                let stopIdx = min(max(0, bannerIsActivePlayer ? player.currentStopIndex : 0), sortedStops.count - 1)
+                let isInTransit = bannerIsActivePlayer && player.playbackMode == .compass
 
                 if isInTransit {
+                    let paths = tour.paths
                     let nextIndex = min(player.currentStopIndex + 1, sortedStops.count - 1)
                     let nextStop = sortedStops[nextIndex]
                     let distanceFeet = player.currentStopIndex < paths.count
@@ -59,22 +76,22 @@ struct ContentView: View {
                         : Int(player.distanceToNextStop * 3.28084)
 
                     DockedPlayerBanner(
-                        tour: activeTour,
+                        tour: tour,
                         currentStopIndex: player.currentStopIndex,
                         onBannerTap: { player.openMapsToNextStop() },
                         navigateAddress: nextStop.address,
                         navigateDistanceFeet: distanceFeet
                     )
                 } else {
-                    let atStop = !player.hasStarted
+                    let atStop = !bannerIsActivePlayer
                         || (player.playbackMode == .listening && !player.isPlaying)
 
                     DockedPlayerBanner(
-                        tour: activeTour,
+                        tour: tour,
                         currentStopIndex: stopIdx,
                         atStop: atStop,
-                        onBannerTap: { handleBannerTap(tour: activeTour, stopIdx: stopIdx) },
-                        onPlayPauseTap: { handlePlayPauseTap(tour: activeTour) }
+                        onBannerTap: { handleBannerTap(tour: tour, stopIdx: stopIdx) },
+                        onPlayPauseTap: { handlePlayPauseTap(tour: tour) }
                     )
                 }
             }
@@ -96,7 +113,7 @@ struct ContentView: View {
     }
 
     private func handlePlayPauseTap(tour: WalkingTour) {
-        if !player.hasStarted {
+        if player.activeTour?.id != tour.id || !player.hasStarted {
             player.startTour(tour)
         } else {
             player.togglePlayPause()
