@@ -13,6 +13,7 @@ import CoreSwift
 struct WalkingTourBrowserView: View {
     @Environment(WalkingTourStore.self) var tourStore
     @Environment(WalkingTourPlayer.self) var player
+    @Binding var path: [WalkingTour]
     @State private var showCreateTour = false
 
     private var allTours: [WalkingTour] {
@@ -28,44 +29,30 @@ struct WalkingTourBrowserView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack(alignment: .bottom) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        // Top nav: "Tours" + avatar
-                        topNav
+        NavigationStack(path: $path) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Top nav: "Tours" + avatar
+                    topNav
 
-                        // Hero unit
-                        if let hero = heroTour {
-                            NavigationLink(value: hero) {
-                                TourHeroCard(tour: hero)
-                            }
-                            .buttonStyle(.plain)
+                    // Hero unit
+                    if let hero = heroTour {
+                        NavigationLink(value: hero) {
+                            TourHeroCard(tour: hero)
                         }
-
-                        // Feed section
-                        if !feedTours.isEmpty {
-                            feedSection
-                        }
-
-                        // Bottom padding for banner
-                        Spacer().frame(height: player.activeTour != nil ? 120 : 40)
+                        .buttonStyle(.plain)
                     }
-                }
-                .background(Color(.systemGroupedBackground))
 
-                // Docked playing banner
-                if let activeTour = player.activeTour {
-                    NavigationLink(value: activeTour) {
-                        DockedPlayerBanner(
-                            tour: activeTour,
-                            currentStopIndex: min(player.currentStopIndex, activeTour.sortedStops.count - 1),
-                            atStop: !player.hasStarted || (player.playbackMode == .listening && !player.isPlaying)
-                        )
+                    // Feed section
+                    if !feedTours.isEmpty {
+                        feedSection
                     }
-                    .buttonStyle(.plain)
+
+                    // Bottom padding for the root-level docked banner
+                    Spacer().frame(height: player.activeTour != nil ? 120 : 40)
                 }
             }
+            .background(Color(.systemGroupedBackground))
             .toolbarVisibility(.hidden, for: .navigationBar)
             .navigationDestination(for: WalkingTour.self) { tour in
                 TourOverviewView(tour: tour)

@@ -14,64 +14,38 @@ struct TourOverviewView: View {
     @Environment(\.dismiss) var dismiss
 
     // Tour state
-    @State private var currentStopIndex: Int = 0
     @State private var expandedStopIndex: Int? = nil
-    @State private var selectedSegment: TourSegment?  // non-nil triggers fullScreenCover
-    @State private var selectedStopIndex: Int = 0
 
     // Derived state
     private var isPlayerActive: Bool { player.activeTour?.id == tour.id }
-    private var isAtStop: Bool { isPlayerActive && (player.playbackMode == .listening || !player.hasStarted) }
-    private var isInTransit: Bool { isPlayerActive && player.playbackMode == .compass }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // Main scrollable content
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    // Hero — only this section extends into the top safe area
-                    heroSection
-                        .ignoresSafeArea(edges: .top)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                // Hero — only this section extends into the top safe area
+                heroSection
+                    .ignoresSafeArea(edges: .top)
 
-                    // Author
-                    authorSection
+                // Author
+                authorSection
 
-                    // Quote
-                    quoteSection
+                // Quote
+                quoteSection
 
-                    // Route header
-                    routeHeader
+                // Route header
+                routeHeader
 
-                    // Stops timeline
-                    stopsTimeline
+                // Stops timeline
+                stopsTimeline
 
-                    // Bottom padding for docked banner
-                    Spacer()
-                        .frame(height: 120)
-                }
+                // Bottom padding for the root-level docked banner
+                Spacer()
+                    .frame(height: 120)
             }
-
-            // Docked banner
-            dockedBanner
         }
-        // Do NOT apply .ignoresSafeArea to this ZStack — it causes a
-        // layout deadlock on NavigationStack push (view collapses to zero
-        // height until a background/foreground cycle forces re-layout).
-        // Instead, .ignoresSafeArea is scoped to heroSection only.
+        // Do NOT apply .ignoresSafeArea to the outer scroll view — it causes
+        // a layout deadlock on NavigationStack push. Scope it to heroSection.
         .toolbarVisibility(.hidden, for: .navigationBar)
-        // Use item: overload — guarantees segment is non-nil when the
-        // cover presents. The isPresented: + if-let pattern can race.
-        .fullScreenCover(item: $selectedSegment) { segment in
-            SegmentPlayerView(
-                tour: tour,
-                stopIndex: selectedStopIndex,
-                segment: segment,
-                progress: isPlayerActive ? player.audioCurrentTime / max(1, player.audioDuration) : 0
-            )
-            // fullScreenCover creates a separate presentation tree —
-            // @Environment objects from the parent are NOT inherited.
-            .environment(player)
-        }
     }
 
     // MARK: - Hero Section
@@ -242,6 +216,7 @@ struct TourOverviewView: View {
         let sortedStops = tour.sortedStops
         let paths = tour.paths
         let playerStopIndex = isPlayerActive ? player.currentStopIndex : -1
+        let isInTransit = isPlayerActive && player.playbackMode == .compass
         let transitFromIndex = isInTransit ? playerStopIndex : -1
 
         return VStack(alignment: .leading, spacing: 0) {
@@ -296,48 +271,6 @@ struct TourOverviewView: View {
         )
     }
 
-    // MARK: - Docked Banner
-
-    @ViewBuilder
-    private var dockedBanner: some View {
-        let sortedStops = tour.sortedStops
-        let paths = tour.paths
-
-        if sortedStops.isEmpty {
-            EmptyView()
-        } else if isInTransit {
-            let nextIndex = min(player.currentStopIndex + 1, sortedStops.count - 1)
-            let nextStop = sortedStops[nextIndex]
-            let distanceFeet = player.currentStopIndex < paths.count
-                ? paths[player.currentStopIndex].distanceFeet
-                : Int(player.distanceToNextStop * 3.28084)
-
-            DockedPlayerBanner(
-                tour: tour,
-                currentStopIndex: player.currentStopIndex,
-                navigateAddress: nextStop.address,
-                navigateDistanceFeet: distanceFeet
-            )
-        } else {
-            let stopIdx = min(isPlayerActive ? player.currentStopIndex : 0, sortedStops.count - 1)
-            DockedPlayerBanner(
-                tour: tour,
-                currentStopIndex: stopIdx,
-                atStop: !isPlayerActive || !player.hasStarted || (isPlayerActive && player.playbackMode == .listening && !player.isPlaying)
-            )
-            .onTapGesture {
-                if isPlayerActive && player.isPlaying {
-                    let segments = sortedStops[stopIdx].segments
-                    if !segments.isEmpty {
-                        selectedStopIndex = stopIdx
-                        selectedSegment = segments[0]
-                    }
-                } else if !isPlayerActive {
-                    player.startTour(tour)
-                }
-            }
-        }
-    }
 }
 
 // MARK: - Elevation Sparkline
