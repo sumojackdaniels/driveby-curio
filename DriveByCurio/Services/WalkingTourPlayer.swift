@@ -140,6 +140,17 @@ final class WalkingTourPlayer: NSObject {
         advanceToNextStop()
     }
 
+    /// Seek the current audio item to the given absolute time in seconds.
+    /// No-op if no item is loaded or the duration is unknown.
+    func seek(to seconds: TimeInterval) {
+        guard audioDuration > 0 else { return }
+        let clamped = min(max(seconds, 0), audioDuration)
+        let target = CMTime(seconds: clamped, preferredTimescale: 600)
+        player.seek(to: target, toleranceBefore: .zero, toleranceAfter: .zero)
+        audioCurrentTime = clamped
+        updateNowPlayingPlaybackState()
+    }
+
     // MARK: - Playback state machine
 
     private func playContentAudio() {

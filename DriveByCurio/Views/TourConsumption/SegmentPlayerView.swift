@@ -142,13 +142,18 @@ struct SegmentPlayerView: View {
 
     private var bottomControls: some View {
         VStack(spacing: 0) {
-            // Waveform
+            // Waveform — tap/drag to scrub. The drag highlights bars in real
+            // time; the actual seek only fires on release.
             WaveformView(
                 progress: currentProgress,
                 barCount: 52,
                 playedColor: TourTokens.ink,
                 unplayedColor: TourTokens.faint,
-                seed: stopIndex + (segment.id.hashValue % 100)
+                seed: stopIndex + (segment.id.hashValue % 100),
+                onSeek: { fraction in
+                    guard isPlayerActive else { return }
+                    player.seek(to: fraction * player.audioDuration)
+                }
             )
             .frame(height: 40)
 
