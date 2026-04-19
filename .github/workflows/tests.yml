@@ -11,13 +11,20 @@ concurrency:
 jobs:
   test:
     name: iOS Unit Tests
-    runs-on: macos-latest
-    timeout-minutes: 20
+    runs-on: macos-15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
-      - name: Show Xcode version
-        run: xcodebuild -version
+      - name: Select latest stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Show Xcode & SDK versions
+        run: |
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i ios || true
 
       - name: Install xcodegen
         run: brew install xcodegen
@@ -40,7 +47,7 @@ jobs:
           xcodebuild test \
             -project DriveByCurio.xcodeproj \
             -scheme DriveByCurio \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             -resultBundlePath TestResults.xcresult
