@@ -71,25 +71,24 @@ struct TourOverviewView: View {
                 endPoint: .bottom
             )
 
-            // Content overlay — pinned to bottom-leading
-            VStack(alignment: .leading, spacing: 0) {
-                // Title + Play button
-                HStack(alignment: .center, spacing: 12) {
+            // Content overlay — title/meta column on the left, Play button
+            // in its own column on the right, both bottom-aligned so the
+            // Play button sits flush with the bottom of the hero image.
+            HStack(alignment: .bottom, spacing: 12) {
+                VStack(alignment: .leading, spacing: 0) {
                     Text(tour.title)
                         .font(.system(size: 28, weight: .regular, design: .serif))
                         .foregroundStyle(.white)
                         .lineSpacing(2)
                         .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
 
-                    heroPlayButton
+                    metaLine
+                        .padding(.top, 12)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                // Meta line: walk · bike · distance
-                metaLine
-                    .padding(.top, 12)
+                heroPlayButton
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
             .padding(.bottom, 18)
 
